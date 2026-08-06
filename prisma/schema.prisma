@@ -1,0 +1,183 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model Movies {
+  id    Int     @id @default(autoincrement())
+  title String? @db.VarChar(255)
+  year  Int?
+}
+
+model Sprachen {
+  id      Int    @id @default(autoincrement())
+  sprache String @default("") @db.VarChar(49)
+}
+
+model dates {
+  OID                 String   @id @default("") @db.VarChar(36)
+  Datum               DateTime @default(dbgenerated("'0001-01-01'")) @db.Date
+  Wochentag           String   @default("") @db.Char(3)
+  Feiertag            String   @default("") @db.VarChar(100)
+  KirchlicherFeiertag String   @default("") @db.VarChar(100)
+  Kalenderwoche       String   @default("0") @db.VarChar(20)
+  Termin              String   @default("") @db.VarChar(255)
+  Ferien              String   @default("") @db.VarChar(25)
+}
+
+model essenGerichte {
+  id               Int      @id @default(autoincrement())
+  name             String   @db.VarChar(255)
+  beschreibung     String?  @db.VarChar(255)
+  bildCover        String?  @default("") @db.VarChar(255)
+  bilderGallery    String   @db.Text
+  bilderCopyright  String   @default("selbst") @db.VarChar(255)
+  preis            Float?   @db.Float
+  zutaten          String?  @db.LongText
+  zubereitung      String?  @db.LongText
+  erinnerungen     String?  @db.LongText
+  kategorie        String   @default("") @db.VarChar(99)
+  datum            DateTime @default(dbgenerated("'1899-01-01'")) @db.Date
+  usernameGerichte String   @db.VarChar(255)
+  schlagworte      String   @db.VarChar(255)
+}
+
+model essenKategorien {
+  id   Int    @id @default(autoincrement())
+  name String @db.VarChar(255)
+}
+
+model hangman {
+  id     Int    @id @default(autoincrement())
+  gruppe String @default("") @db.VarChar(255)
+}
+
+model links {
+  id     Int    @id @default(autoincrement())
+  titel  String @default("") @db.VarChar(255)
+  url    String @default("") @db.VarChar(255)
+  gruppe String @db.VarChar(255)
+  ord    Int    @default(0)
+}
+
+model makerspaceTexte {
+  id          Int    @id @default(autoincrement())
+  bezeichnung String @db.VarChar(255)
+  text        String @db.Text
+  gruppe      String @db.VarChar(255)
+}
+
+model sessions {
+  session_id String  @id @db.VarChar(128)
+  expires    Int     @db.UnsignedInt
+  data       String? @db.MediumText
+}
+
+model users {
+  id                      Int     @id @default(autoincrement())
+  firstname               String? @db.VarChar(255)
+  lastname                String? @db.VarChar(255)
+  username                String? @db.VarChar(255)
+  email                   String? @db.VarChar(255)
+  hash                    String  @db.VarChar(200)
+  salt                    String  @db.VarChar(100)
+  isAdmin                 Int     @db.TinyInt
+  selectedSprache         String  @db.VarChar(49)
+  selectedBuch            String  @db.VarChar(99)
+  selectedKapitel         String  @db.VarChar(99)
+  role                    String  @default("") @db.VarChar(20)
+  selectedHangmanGroup    String  @default("Wörter") @db.VarChar(99)
+  selectedSprachenBook    String  @db.Text
+  selectedSprachenChapter String  @db.Text
+}
+
+model vocs {
+  id                       Int      @id @default(autoincrement())
+  ord                      Int      @default(0)
+  ordTemp                  String   @default("") @db.VarChar(6)
+  ordvokabelkartenseite1   String   @default("0") @db.VarChar(4)
+  ordvokabelkartenseite2   String   @default("0") @db.VarChar(4)
+  anfragen                 Int      @default(0)
+  art                      String   @default("") @db.VarChar(99)
+  artikel                  String   @default("") @db.VarChar(99)
+  wort                     String   @default("") @db.VarChar(255)
+  geschlecht               String   @default("") @db.VarChar(1)
+  aussprache               String   @default("") @db.VarChar(99)
+  uebersetzung             String   @db.Text
+  beispielsatz             String   @db.Text
+  beispielsatzuebersetzung String   @db.Text
+  eigenerKommentar         String   @db.MediumText
+  sprache                  String   @default("") @db.VarChar(20)
+  book                     String   @default("") @db.VarChar(99)
+  chapter                  String   @default("") @db.VarChar(99)
+  schwierigkeitsgrad       Int      @default(0)
+  abgefragt                Int      @default(0)
+  wiederholen              Int      @default(0)
+  kapitel                  Int      @default(0)
+  kapiteltext              String   @default("") @db.VarChar(99)
+  merker1                  Int      @default(0) @db.TinyInt
+  merker2                  Int      @default(0) @db.TinyInt
+  merker3                  Int      @default(0) @db.TinyInt
+  sentences                String   @db.MediumText
+  regel                    Int      @default(0) @db.TinyInt
+  gruppe                   String?  @db.VarChar(99)
+  datum                    DateTime @default(dbgenerated("'0001-01-01'")) @db.Date
+  usernameVocs             String   @default("") @db.VarChar(255)
+  frase                    String   @db.Text
+  fraseuebersetzung        String   @db.Text
+}
+
+model vocsOrigin {
+  id                       Int     @id @default(autoincrement())
+  ord                      Int     @default(0)
+  ordTemp                  String  @default("") @db.VarChar(6)
+  OrdVokabelkartenSeite1   String  @default("0") @db.VarChar(4)
+  OrdVokabelkartenSeite2   String  @default("0") @db.VarChar(4)
+  anfragen                 Int     @default(0)
+  art                      String  @default("") @db.VarChar(99)
+  artikel                  String  @default("") @db.VarChar(99)
+  wort                     String  @default("") @db.VarChar(255)
+  geschlecht               String  @db.VarChar(1)
+  aussprache               String  @db.VarChar(99)
+  uebersetzung             String  @db.Text
+  beispielsatz             String  @db.Text
+  beispielsatzUebersetzung String  @db.Text
+  eigenerKommentar         String  @db.MediumText
+  sprache                  String  @default("") @db.VarChar(20)
+  bereich1                 String  @default("") @db.VarChar(99)
+  bereich2                 String  @default("") @db.VarChar(99)
+  schwierigkeitsgrad       Int     @default(0)
+  abgefragt                Int     @default(0)
+  wiederholen              Int     @default(0)
+  kapitel                  Int     @default(0)
+  kapitelText              String  @default("") @db.VarChar(99)
+  merker1                  Int     @default(0) @db.TinyInt
+  merker2                  Int     @default(0) @db.TinyInt
+  merker3                  Int     @default(0) @db.TinyInt
+  sentences                String  @db.MediumText
+  regel                    Int     @default(0) @db.TinyInt
+  gruppe                   String? @db.VarChar(99)
+}
+
+enum UserRole {
+  USER
+  EDITOR
+  ADMIN
+}
+
+model UserEckiHack {
+  id           Int      @id @default(autoincrement())
+  username     String   @unique @db.VarChar(100)
+  name         String?  @db.VarChar(150)
+  passwordHash String   @db.VarChar(255)
+  role         UserRole @default(USER)
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("userseckihack")
+}

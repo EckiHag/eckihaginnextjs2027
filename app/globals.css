@@ -1,26 +1,367 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * =========================================================
+ * TAILWIND-ZUORDNUNG
+ * =========================================================
+ *
+ * Hier werden unsere CSS-Variablen in Tailwind-Farben
+ * übersetzt.
+ *
+ * Beispiel:
+ * --color-primary erzeugt unter anderem:
+ * bg-primary
+ * text-primary
+ * border-primary
+ */
 
 @theme inline {
+  /* Grundflächen */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+
+  /* Karten und überlagerte Flächen */
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+
+  /* Bedienfarben */
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-hover: var(--primary-hover);
+
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary-hover: var(--secondary-hover);
+
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+
+  /* Zurückhaltende Flächen und Texte */
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+
+  /* Formulare und Rahmen */
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* Statusfarben */
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-success-muted: var(--success-muted);
+  --color-success-muted-foreground: var(--success-muted-foreground);
+
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-warning-muted: var(--warning-muted);
+  --color-warning-muted-foreground: var(--warning-muted-foreground);
+
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  --color-info-muted: var(--info-muted);
+  --color-info-muted-foreground: var(--info-muted-foreground);
+
+  /* Tabellen */
+  --color-table-header: var(--table-header);
+  --color-table-header-foreground: var(--table-header-foreground);
+  --color-table-stripe: var(--table-stripe);
+  --color-table-hover: var(--table-hover);
+  --color-table-selected: var(--table-selected);
+
+  /* Sidebar */
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Diagramme */
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  /* Rundungen */
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/*
+ * =========================================================
+ * HELLES FARBCHEMA
+ * =========================================================
+ */
+
+:root {
+  /*
+   * Grundflächen
+   */
+  --background: #f8fafc;
+  --foreground: #172033;
+
+  --card: #ffffff;
+  --card-foreground: #172033;
+
+  --popover: #ffffff;
+  --popover-foreground: #172033;
+
+  /*
+   * Primärfarbe:
+   * zentrale Aktionen, aktive Elemente, Links und Fokus
+   */
+  --primary: #315a85;
+  --primary-hover: #284d73;
+  --primary-foreground: #ffffff;
+
+  /*
+   * Sekundärfarbe:
+   * zurückhaltende Buttons und Nebenaktionen
+   */
+  --secondary: #e6edf5;
+  --secondary-hover: #d8e3ef;
+  --secondary-foreground: #263d56;
+
+  /*
+   * Accent:
+   * hervorgehobene, aber nicht primäre Flächen
+   */
+  --accent: #e4eddf;
+  --accent-foreground: #294423;
+
+  /*
+   * Dezente Flächen und Hilfstexte
+   */
+  --muted: #eef2f6;
+  --muted-foreground: #5f6f82;
+
+  /*
+   * Rahmen und Formularfelder
+   */
+  --border: #d7dee7;
+  --input: #cbd5e1;
+  --ring: #527ba4;
+
+  /*
+   * Fehler und gefährliche Aktionen
+   */
+  --destructive: #b83f3f;
+  --destructive-foreground: #ffffff;
+
+  /*
+   * Erfolg
+   */
+  --success: #4f7f50;
+  --success-foreground: #ffffff;
+  --success-muted: #e1efdf;
+  --success-muted-foreground: #315c34;
+
+  /*
+   * Warnung
+   */
+  --warning: #c47c13;
+  --warning-foreground: #ffffff;
+  --warning-muted: #fff1d4;
+  --warning-muted-foreground: #744707;
+
+  /*
+   * Information
+   */
+  --info: #3f77ad;
+  --info-foreground: #ffffff;
+  --info-muted: #dfeefa;
+  --info-muted-foreground: #27547d;
+
+  /*
+   * Tabellen
+   */
+  --table-header: #315a85;
+  --table-header-foreground: #ffffff;
+  --table-stripe: #f3f7fb;
+  --table-hover: #e8f1f9;
+  --table-selected: #dcebf7;
+
+  /*
+   * Sidebar
+   */
+  --sidebar: #23364a;
+  --sidebar-foreground: #f5f8fb;
+
+  --sidebar-primary: #4e789f;
+  --sidebar-primary-foreground: #ffffff;
+
+  --sidebar-accent: #344e68;
+  --sidebar-accent-foreground: #ffffff;
+
+  --sidebar-border: #445d74;
+  --sidebar-ring: #8eb4d5;
+
+  /*
+   * Diagramme und Auswertungen
+   */
+  --chart-1: #315a85;
+  --chart-2: #4f7f50;
+  --chart-3: #c47c13;
+  --chart-4: #765c9b;
+  --chart-5: #397d83;
+
+  /*
+   * Grundradius
+   */
+  --radius: 0.625rem;
+}
+
+/*
+ * =========================================================
+ * DUNKLES FARBCHEMA
+ * =========================================================
+ */
+
+.dark {
+  /*
+   * Grundflächen
+   */
+  --background: #111923;
+  --foreground: #edf3f8;
+
+  --card: #192431;
+  --card-foreground: #edf3f8;
+
+  --popover: #1c2835;
+  --popover-foreground: #edf3f8;
+
+  /*
+   * Primärfarbe
+   */
+  --primary: #82add2;
+  --primary-hover: #9bbddd;
+  --primary-foreground: #102337;
+
+  /*
+   * Sekundärfarbe
+   */
+  --secondary: #293848;
+  --secondary-hover: #35475a;
+  --secondary-foreground: #e5edf5;
+
+  /*
+   * Accent
+   */
+  --accent: #304732;
+  --accent-foreground: #e7f2e4;
+
+  /*
+   * Dezente Flächen und Hilfstexte
+   */
+  --muted: #253240;
+  --muted-foreground: #aebdcb;
+
+  /*
+   * Rahmen und Formulare
+   */
+  --border: #3d4b5b;
+  --input: #465668;
+  --ring: #82add2;
+
+  /*
+   * Fehler
+   */
+  --destructive: #db6868;
+  --destructive-foreground: #ffffff;
+
+  /*
+   * Erfolg
+   */
+  --success: #78a879;
+  --success-foreground: #102513;
+  --success-muted: #253d29;
+  --success-muted-foreground: #b9d9b9;
+
+  /*
+   * Warnung
+   */
+  --warning: #e0a142;
+  --warning-foreground: #352100;
+  --warning-muted: #47391f;
+  --warning-muted-foreground: #f2d596;
+
+  /*
+   * Information
+   */
+  --info: #73a7d5;
+  --info-foreground: #102337;
+  --info-muted: #233c52;
+  --info-muted-foreground: #b9d8ef;
+
+  /*
+   * Tabellen
+   */
+  --table-header: #294964;
+  --table-header-foreground: #f5f8fb;
+  --table-stripe: #1e2b39;
+  --table-hover: #293c4e;
+  --table-selected: #304b62;
+
+  /*
+   * Sidebar
+   */
+  --sidebar: #0e1924;
+  --sidebar-foreground: #edf3f8;
+
+  --sidebar-primary: #82add2;
+  --sidebar-primary-foreground: #102337;
+
+  --sidebar-accent: #253d52;
+  --sidebar-accent-foreground: #ffffff;
+
+  --sidebar-border: #354b5f;
+  --sidebar-ring: #82add2;
+
+  /*
+   * Diagramme
+   */
+  --chart-1: #82add2;
+  --chart-2: #78a879;
+  --chart-3: #e0a142;
+  --chart-4: #ad91cd;
+  --chart-5: #70b2b6;
+}
+
+/*
+ * =========================================================
+ * GLOBALE GRUNDEINSTELLUNGEN
+ * =========================================================
+ */
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
   }
-}
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  html {
+    background: var(--background);
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+
+  button,
+  [role="button"] {
+    cursor: pointer;
+  }
 }
