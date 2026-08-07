@@ -87,6 +87,20 @@ export default function VokabelAuswahl({ initialLanguages, initialLanguage, init
     return data as T;
   }
 
+  async function saveSelection(language: string, book: string, chapter: string) {
+    await fetch("/api/user/save-selection", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        language,
+        book,
+        chapter,
+      }),
+    });
+  }
+
   async function handleLanguageChange(newLanguage: string) {
     try {
       setLoading(true);
@@ -114,6 +128,7 @@ export default function VokabelAuswahl({ initialLanguages, initialLanguage, init
       setChapter(data.selectedChapter);
 
       setVocs(data.vocs);
+      await saveSelection(newLanguage, data.selectedBook, data.selectedChapter);
     } catch (error) {
       setError(error instanceof Error ? error.message : "Unbekannter Fehler");
     } finally {
@@ -145,6 +160,7 @@ export default function VokabelAuswahl({ initialLanguages, initialLanguage, init
       setChapters(data.chapters);
       setChapter(data.selectedChapter);
       setVocs(data.vocs);
+      await saveSelection(language, newBook, data.selectedChapter);
     } catch (error) {
       setError(error instanceof Error ? error.message : "Unbekannter Fehler");
     } finally {
@@ -165,6 +181,7 @@ export default function VokabelAuswahl({ initialLanguages, initialLanguage, init
       const data = await fetchJson<ChapterResponse>(url);
 
       setVocs(data.vocs);
+      await saveSelection(language, book, newChapter);
     } catch (error) {
       setError(error instanceof Error ? error.message : "Unbekannter Fehler");
     } finally {
@@ -173,196 +190,136 @@ export default function VokabelAuswahl({ initialLanguages, initialLanguage, init
   }
 
   return (
-    <section>
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-          gap: "1rem",
-          marginBottom: "2rem",
-        }}
-      >
-        <label>
-          <span
-            style={{
-              display: "block",
-              fontWeight: 600,
-              marginBottom: "0.4rem",
-            }}
-          >
-            Sprache
-          </span>
+    <section className="mx-auto w-full max-w-6xl px-3 py-4 sm:px-5 sm:py-5 lg:px-6 lg:py-6">
+      {/* Auswahlbereich */}
+      <div className="mb-6 rounded-xl border bg-card p-4 shadow-sm sm:p-5 lg:mb-8">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {/* Sprache */}
+          <label className="block min-w-0">
+            <span className="mb-1.5 block text-sm font-semibold sm:text-base">Sprache</span>
 
-          <select
-            value={language}
-            onChange={(event) => void handleLanguageChange(event.target.value)}
-            disabled={loading || languages.length === 0}
-            style={{
-              width: "100%",
-              padding: "0.65rem",
-              fontSize: "1rem",
-            }}
-          >
-            {languages.map((item) => (
-              <option key={item} value={item}>
-                {item}
-              </option>
-            ))}
-          </select>
-        </label>
+            <select
+              value={language}
+              onChange={(event) => void handleLanguageChange(event.target.value)}
+              disabled={loading || languages.length === 0}
+              className="w-full min-w-0 rounded-lg border border-border bg-background px-3 py-2.5 text-base text-foreground outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/30 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {languages.map((item) => (
+                <option key={item} value={item}>
+                  {item}
+                </option>
+              ))}
+            </select>
+          </label>
 
-        <label>
-          <span
-            style={{
-              display: "block",
-              fontWeight: 600,
-              marginBottom: "0.4rem",
-            }}
-          >
-            Buch
-          </span>
+          {/* Buch */}
+          <label className="block min-w-0">
+            <span className="mb-1.5 block text-sm font-semibold sm:text-base">Buch</span>
 
-          <select
-            value={book}
-            onChange={(event) => void handleBookChange(event.target.value)}
-            disabled={loading || books.length === 0}
-            style={{
-              width: "100%",
-              padding: "0.65rem",
-              fontSize: "1rem",
-            }}
-          >
-            {books.map((item) => (
-              <option key={item} value={item}>
-                {item}
-              </option>
-            ))}
-          </select>
-        </label>
+            <select
+              value={book}
+              onChange={(event) => void handleBookChange(event.target.value)}
+              disabled={loading || books.length === 0}
+              className="w-full min-w-0 rounded-lg border border-border bg-background px-3 py-2.5 text-base text-foreground outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/30 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {books.map((item) => (
+                <option key={item} value={item}>
+                  {item}
+                </option>
+              ))}
+            </select>
+          </label>
 
-        <label>
-          <span
-            style={{
-              display: "block",
-              fontWeight: 600,
-              marginBottom: "0.4rem",
-            }}
-          >
-            Kapitel
-          </span>
+          {/* Kapitel */}
+          <label className="block min-w-0 md:col-span-2 lg:col-span-1">
+            <span className="mb-1.5 block text-sm font-semibold sm:text-base">Kapitel</span>
 
-          <select
-            value={chapter}
-            onChange={(event) => void handleChapterChange(event.target.value)}
-            disabled={loading || chapters.length === 0}
-            style={{
-              width: "100%",
-              padding: "0.65rem",
-              fontSize: "1rem",
-            }}
-          >
-            {chapters.map((item) => (
-              <option key={`${item.kapitel}-${item.chapter}`} value={item.chapter}>
-                {item.chapter || `Kapitel ${item.kapitel}`}
-              </option>
-            ))}
-          </select>
-        </label>
+            <select
+              value={chapter}
+              onChange={(event) => void handleChapterChange(event.target.value)}
+              disabled={loading || chapters.length === 0}
+              className="w-full min-w-0 rounded-lg border border-border bg-background px-3 py-2.5 text-base text-foreground outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/30 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {chapters.map((item) => (
+                <option key={`${item.kapitel}-${item.chapter}`} value={item.chapter}>
+                  {item.chapter || `Kapitel ${item.kapitel}`}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
       </div>
 
-      {loading && <p style={{ marginBottom: "1rem" }}>Daten werden geladen …</p>}
+      {/* Ladeanzeige */}
+      {loading && <div className="mb-4 rounded-lg bg-muted p-4 text-sm sm:text-base">Daten werden geladen …</div>}
 
-      {error && (
-        <p
-          style={{
-            color: "#b00020",
-            marginBottom: "1rem",
-          }}
-        >
-          {error}
-        </p>
-      )}
+      {/* Fehler */}
+      {error && <div className="mb-4 rounded-lg border border-red-600 bg-red-50 p-4 text-sm text-red-800 sm:text-base">{error}</div>}
 
       {!loading && !error && (
-        <div>
-          <h2>
-            {book}
-            {chapter ? ` – ${chapter}` : ""}
-          </h2>
+        <>
+          {/* Überschrift */}
+          <div className="mb-5 sm:mb-6">
+            <h2 className="break-words text-xl font-bold sm:text-2xl">
+              {book}
+              {chapter ? ` – ${chapter}` : ""}
+            </h2>
 
-          <p>Es wurden {vocs.length} Vokabeln gefunden.</p>
+            <p className="mt-1 text-sm text-muted-foreground sm:text-base">
+              {vocs.length} {vocs.length === 1 ? "Datensatz" : "Datensätze"}
+            </p>
+          </div>
 
           {vocs.length === 0 ? (
-            <p>Für diese Auswahl sind keine Vokabeln vorhanden.</p>
+            <div className="rounded-xl border border-dashed border-border p-5 text-center text-sm text-muted-foreground sm:p-6 sm:text-base">
+              Für diese Auswahl sind keine Datensätze vorhanden.
+            </div>
           ) : (
-            <div
-              style={{
-                marginTop: "1.5rem",
-                display: "grid",
-                gap: "1rem",
-              }}
-            >
+            <div className="grid gap-3 sm:gap-4">
               {vocs.map((voc) => (
-                <article
-                  key={voc.id}
-                  style={{
-                    border: "1px solid #cccccc",
-                    borderRadius: "8px",
-                    padding: "1rem",
-                  }}
-                >
-                  <h3
-                    style={{
-                      marginTop: 0,
-                      marginBottom: "0.5rem",
-                    }}
-                  >
-                    {voc.artikel ? `${voc.artikel} ` : ""}
-                    {voc.wort}
-                  </h3>
+                <article key={voc.id} className="min-w-0 rounded-xl border border-border bg-card p-4 shadow-sm sm:p-5">
+                  {/* Kopf */}
+                  <div className="mb-3 flex min-w-0 items-start justify-between gap-4 sm:mb-4">
+                    <div className="min-w-0">
+                      <h3 className="break-words text-lg font-bold sm:text-xl">
+                        {voc.artikel ? `${voc.artikel} ` : ""}
+                        {voc.wort}
+                      </h3>
+                    </div>
+                  </div>
 
-                  <p>
-                    <strong>Übersetzung:</strong> {voc.uebersetzung}
-                  </p>
+                  {/* Grunddaten */}
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">{/* Hier können später weitere Felder stehen */}</div>
 
-                  {voc.aussprache && (
-                    <p>
-                      <strong>Aussprache:</strong> {voc.aussprache}
-                    </p>
-                  )}
-
+                  {/* Beispielsatz */}
                   {voc.beispielsatz && (
-                    <div
-                      style={{
-                        marginTop: "0.8rem",
-                        paddingTop: "0.8rem",
-                        borderTop: "1px solid #eeeeee",
-                      }}
-                    >
-                      <p>{voc.beispielsatz}</p>
+                    <div className="mt-4 overflow-hidden rounded-lg bg-muted p-3 sm:mt-5 sm:p-4">
+                      <div
+                        className="wrap-break-word text-sm leading-relaxed text-muted-foreground sm:text-base [&_a]:font-medium [&_a]:text-primary [&_a]:underline [&_a]:underline-offset-2 hover:[&_a]:opacity-80"
+                        dangerouslySetInnerHTML={{
+                          __html: voc.beispielsatz,
+                        }}
+                      />
 
                       {voc.beispielsatzuebersetzung && (
-                        <p
-                          style={{
-                            color: "#555555",
-                          }}
-                        >
-                          {voc.beispielsatzuebersetzung}
-                        </p>
+                        <>
+                          <div className="my-3 border-t border-border" />
+
+                          <div
+                            className="wrap-break-word text-sm leading-relaxed text-muted-foreground sm:text-base [&_a]:font-medium [&_a]:text-primary [&_a]:underline [&_a]:underline-offset-2 hover:[&_a]:opacity-80"
+                            dangerouslySetInnerHTML={{
+                              __html: voc.beispielsatzuebersetzung,
+                            }}
+                          />
+                        </>
                       )}
                     </div>
-                  )}
-
-                  {voc.eigenerKommentar && (
-                    <p>
-                      <strong>Kommentar:</strong> {voc.eigenerKommentar}
-                    </p>
                   )}
                 </article>
               ))}
             </div>
           )}
-        </div>
+        </>
       )}
     </section>
   );

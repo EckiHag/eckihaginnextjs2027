@@ -178,6 +178,9 @@ model UserEckiHack {
   active       Boolean  @default(true)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+  sprache_save      String   @default("") @db.VarChar(20)
+  book_save          String   @default("") @db.VarChar(99)
+  chapter_save       String   @default("") @db.VarChar(99)
 
   @@map("userseckihack")
 }

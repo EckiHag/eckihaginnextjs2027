@@ -1,9 +1,46 @@
 import { prisma } from "@/lib/prisma";
 import VokabelAuswahl from "./VokabelAuswahl";
-
+import { auth } from "@/auth";
 export const dynamic = "force-dynamic";
 
+const session = await auth();
+
+if (!session?.user?.id) {
+  throw new Error("Kein angemeldeter Benutzer gefunden.");
+}
+
+const userId = Number(session.user.id);
+
 export default async function VokabelnPage() {
+  /*
+   * 0. Angemeldeten Benutzer ermitteln
+   *
+   * WICHTIG:
+   * Hier muss die ID des aktuell angemeldeten Benutzers hinein.
+   *
+   * Beispiel:
+   * const userId = ...
+   */
+  const userId = 1; // VORLÄUFIG ersetzen durch die ID des eingeloggten Benutzers
+
+  /*
+   * Gespeicherte Vokabel-Auswahl des Benutzers laden
+   */
+  const user = await prisma.userEckiHack.findUnique({
+    where: {
+      id: userId,
+    },
+    select: {
+      sprache_save: true,
+      book_save: true,
+      chapter_save: true,
+    },
+  });
+
+  const savedLanguage = user?.sprache_save ?? "";
+  const savedBook = user?.book_save ?? "";
+  const savedChapter = user?.chapter_save ?? "";
+
   /*
    * 1. Alle vorhandenen Sprachen laden
    */
@@ -25,17 +62,20 @@ export default async function VokabelnPage() {
   const languages = languageRows.map((row) => row.sprache);
 
   /*
-   * Die erste Sprache wird als Startwert verwendet.
+   * Gespeicherte Sprache verwenden,
+   * sofern sie noch existiert.
+   *
+   * Sonst erste vorhandene Sprache verwenden.
    */
-  const firstLanguage = languages[0] ?? "";
+  const initialLanguage = savedLanguage && languages.includes(savedLanguage) ? savedLanguage : (languages[0] ?? "");
 
   /*
-   * 2. Alle Bücher der ersten Sprache laden
+   * 2. Bücher der ausgewählten Sprache laden
    */
-  const bookRows = firstLanguage
+  const bookRows = initialLanguage
     ? await prisma.vocs.findMany({
         where: {
-          sprache: firstLanguage,
+          sprache: initialLanguage,
           book: {
             not: "",
           },
@@ -51,17 +91,24 @@ export default async function VokabelnPage() {
     : [];
 
   const books = bookRows.map((row) => row.book);
-  const firstBook = books[0] ?? "";
 
   /*
-   * 3. Alle Kapitel des ersten Buches laden
+   * Gespeichertes Buch verwenden,
+   * sofern es innerhalb dieser Sprache existiert.
+   *
+   * Sonst erstes Buch verwenden.
+   */
+  const initialBook = savedBook && books.includes(savedBook) ? savedBook : (books[0] ?? "");
+
+  /*
+   * 3. Kapitel des ausgewählten Buches laden
    */
   const chapters =
-    firstLanguage && firstBook
+    initialLanguage && initialBook
       ? await prisma.vocs.findMany({
           where: {
-            sprache: firstLanguage,
-            book: firstBook,
+            sprache: initialLanguage,
+            book: initialBook,
             chapter: {
               not: "",
             },
@@ -77,18 +124,25 @@ export default async function VokabelnPage() {
         })
       : [];
 
-  const firstChapter = chapters[0]?.chapter ?? "";
+  /*
+   * Prüfen, ob das gespeicherte Kapitel
+   * innerhalb des gewählten Buches noch existiert.
+   */
+  const savedChapterExists = chapters.some((item) => item.chapter === savedChapter);
+
+  const initialChapter = savedChapter && savedChapterExists ? savedChapter : (chapters[0]?.chapter ?? "");
 
   /*
-   * 4. Vokabeln des ersten Kapitels laden
+   * 4. Vokabeln der gespeicherten bzw.
+   * ausgewählten Kombination laden
    */
   const vocs =
-    firstLanguage && firstBook && firstChapter
+    initialLanguage && initialBook && initialChapter
       ? await prisma.vocs.findMany({
           where: {
-            sprache: firstLanguage,
-            book: firstBook,
-            chapter: firstChapter,
+            sprache: initialLanguage,
+            book: initialBook,
+            chapter: initialChapter,
           },
           orderBy: [
             {
@@ -116,11 +170,11 @@ export default async function VokabelnPage() {
       ) : (
         <VokabelAuswahl
           initialLanguages={languages}
-          initialLanguage={firstLanguage}
+          initialLanguage={initialLanguage}
           initialBooks={books}
-          initialBook={firstBook}
+          initialBook={initialBook}
           initialChapters={chapters}
-          initialChapter={firstChapter}
+          initialChapter={initialChapter}
           initialVocs={vocs}
         />
       )}
