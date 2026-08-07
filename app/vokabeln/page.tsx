@@ -3,26 +3,23 @@ import VokabelAuswahl from "./VokabelAuswahl";
 import { auth } from "@/auth";
 export const dynamic = "force-dynamic";
 
-const session = await auth();
+// const session = await auth();
 
-if (!session?.user?.id) {
-  throw new Error("Kein angemeldeter Benutzer gefunden.");
-}
+// if (!session?.user?.id) {
+//   throw new Error("Kein angemeldeter Benutzer gefunden.");
+// }
 
-const userId = Number(session.user.id);
+// const userId = Number(session.user.id);
 
 export default async function VokabelnPage() {
-  /*
-   * 0. Angemeldeten Benutzer ermitteln
-   *
-   * WICHTIG:
-   * Hier muss die ID des aktuell angemeldeten Benutzers hinein.
-   *
-   * Beispiel:
-   * const userId = ...
-   */
-  const userId = 1; // VORLÄUFIG ersetzen durch die ID des eingeloggten Benutzers
+  // 0. Angemeldeten Benutzer ermitteln
+  const session = await auth();
 
+  if (!session?.user?.id) {
+    throw new Error("Kein angemeldeter Benutzer gefunden.");
+  }
+
+  const userId = Number(session.user.id);
   /*
    * Gespeicherte Vokabel-Auswahl des Benutzers laden
    */
