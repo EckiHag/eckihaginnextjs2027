@@ -69,20 +69,24 @@ export function AppSidebar({ userRole }: AppSidebarProps) {
     }
   }
 
-  function handleTouchEnd(event: React.TouchEvent) {
+  function handleTouchMove(event: React.TouchEvent) {
     if (touchStartX.current === null) {
       return;
     }
 
-    const endX = event.changedTouches[0].clientX;
-    const distance = endX - touchStartX.current;
+    const currentX = event.touches[0].clientX;
+    const distance = currentX - touchStartX.current;
 
-    if (distance > 60 && isMobile) {
+    if (distance > 50 && isMobile) {
       setOpenMobile(true);
+      touchStartX.current = null;
     }
+  }
 
+  function handleTouchEnd() {
     touchStartX.current = null;
   }
+
   function closeMobileSidebar() {
     if (isMobile) {
       setOpenMobile(false);
@@ -90,7 +94,7 @@ export function AppSidebar({ userRole }: AppSidebarProps) {
   }
   return (
     <>
-      {isMobile && <div className="fixed inset-y-0 left-0 z-40 w-6" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd} />}
+      {isMobile && <div className="fixed inset-y-0 left-0 z-40 w-6" onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd} />}
 
       <Sidebar collapsible="icon">
         <SidebarHeader className="border-b">
