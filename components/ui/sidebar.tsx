@@ -15,6 +15,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { MenuIcon } from "lucide-react";
 
+import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
+
 const SIDEBAR_COOKIE_NAME = "sidebar_state";
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
 const SIDEBAR_WIDTH = "16rem";
@@ -158,27 +160,25 @@ function Sidebar({
 
   if (isMobile) {
     return (
-      <Sheet open={openMobile} onOpenChange={setOpenMobile} {...props}>
-        <SheetContent
-          dir={dir}
+      <Drawer open={openMobile} onOpenChange={setOpenMobile} swipeDirection="left">
+        <DrawerContent
           data-sidebar="sidebar"
-          data-slot="sidebar"
           data-mobile="true"
-          className="w-(--sidebar-width) bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden"
+          className="fixed inset-y-0 left-0 h-full w-(--sidebar-width) rounded-none border-r bg-sidebar p-0 text-sidebar-foreground"
           style={
             {
               "--sidebar-width": SIDEBAR_WIDTH_MOBILE,
             } as React.CSSProperties
           }
-          side={side}
         >
-          <SheetHeader className="sr-only">
-            <SheetTitle>Sidebar</SheetTitle>
-            <SheetDescription>Displays the mobile sidebar.</SheetDescription>
-          </SheetHeader>
-          <div className="flex h-full w-full flex-col">{children}</div>
-        </SheetContent>
-      </Sheet>
+          <DrawerHeader className="sr-only">
+            <DrawerTitle>Navigation</DrawerTitle>
+            <DrawerDescription>Hauptnavigation von EckiHack</DrawerDescription>
+          </DrawerHeader>
+
+          <div className="flex size-full flex-col">{children}</div>
+        </DrawerContent>
+      </Drawer>
     );
   }
 
