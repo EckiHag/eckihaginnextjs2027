@@ -19,7 +19,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       const isLoggedIn = Boolean(auth?.user);
       const pathname = request.nextUrl.pathname;
 
-      const protectedRoutes = ["/vokabeln", "/datenbanktest", "/personen", "/designtestpage"];
+      const protectedRoutes = ["/vokabeln", "/datenbanktest", "/daten", "/designtestpage"];
 
       const isProtectedRoute = protectedRoutes.some((route) => pathname.startsWith(route));
 

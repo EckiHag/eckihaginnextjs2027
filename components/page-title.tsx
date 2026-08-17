@@ -7,7 +7,7 @@ const pageTitles: Record<string, string> = {
   "/vokabeln": "Vokabeln anzeigen",
   "/vokabeln/suchen": "Vokabeln suchen",
   "/vokabeln/drucken": "Vokabeln drucken",
-  "/personen": "Personen",
+  "/daten": "Daten",
   "/datenbanktest": "Datenbanktest",
   "/designtestpage": "DesignTestPage",
 };

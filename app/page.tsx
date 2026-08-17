@@ -11,7 +11,7 @@ export default function Home() {
 
       <div className={styles.grid}>
         <a href="https://places26.vercel.app/" target="_blank" rel="noopener noreferrer" className={styles.card}>
-          <Image src="/images/places26.jpg" alt="Personen" width={500} height={300} className={styles.image} />
+          <Image src="/images/places26.jpg" alt="Daten" width={500} height={300} className={styles.image} />
 
           <h2>Places26</h2>
           <p>Gehe zu Places26</p>
