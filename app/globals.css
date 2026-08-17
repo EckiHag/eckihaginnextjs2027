@@ -20,6 +20,14 @@
  */
 
 @theme inline {
+  --color-area-blue: #eaf4ff;
+  --color-area-green: #edf8f0;
+  --color-area-yellow: #fff8df;
+  --color-area-orange: #fff0e5;
+  --color-area-red: #fceeee;
+  --color-area-purple: #f4efff;
+  --color-area-gray: #f3f4f6;
+
   /* Grundflächen */
   --color-background: var(--background);
   --color-foreground: var(--foreground);

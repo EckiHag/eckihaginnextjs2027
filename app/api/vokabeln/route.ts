@@ -187,6 +187,78 @@ export async function GET(request: NextRequest) {
       });
     }
 
+    /*
+     * 4. Ein Shortcut wurde ausgewählt.
+     *
+     * Zurückgegeben werden:
+     * - alle Bücher der Sprache
+     * - alle Kapitel des ausgewählten Buches
+     * - die Vokabeln des ausgewählten Kapitels
+     */
+    if (action === "shortcut") {
+      if (!sprache || !book || !chapter) {
+        return NextResponse.json({ error: "Sprache, Buch oder Kapitel fehlt." }, { status: 400 });
+      }
+
+      const bookRows = await prisma.vocs.findMany({
+        where: {
+          sprache,
+          book: {
+            not: "",
+          },
+        },
+        select: {
+          book: true,
+        },
+        distinct: ["book"],
+        orderBy: {
+          book: "asc",
+        },
+      });
+
+      const books = bookRows.map((row) => row.book);
+
+      const chapters = await prisma.vocs.findMany({
+        where: {
+          sprache,
+          book,
+          chapter: {
+            not: "",
+          },
+        },
+        select: {
+          chapter: true,
+          kapitel: true,
+        },
+        distinct: ["chapter", "kapitel"],
+        orderBy: {
+          kapitel: "asc",
+        },
+      });
+
+      const vocs = await prisma.vocs.findMany({
+        where: {
+          sprache,
+          book,
+          chapter,
+        },
+        orderBy: [
+          {
+            ord: "asc",
+          },
+          {
+            id: "asc",
+          },
+        ],
+      });
+
+      return NextResponse.json({
+        books,
+        chapters,
+        vocs,
+      });
+    }
+
     return NextResponse.json({ error: "Unbekannte Aktion." }, { status: 400 });
   } catch (error) {
     console.error("Fehler in /api/vokabeln:", error);

@@ -1,7 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { BookOpen, BookMarked, NotebookPen, Languages, Boxes, ScrollText, BookText, Save } from "lucide-react";
 
+const shortcutIcons = {
+  BookOpen,
+  BookMarked,
+  NotebookPen,
+  Languages,
+  Boxes,
+  ScrollText,
+  BookText,
+};
 type ChapterOption = {
   chapter: string;
   kapitel: number;
@@ -58,7 +68,23 @@ type ChapterResponse = {
   vocs: Voc[];
 };
 
+type Shortcut = {
+  id: number;
+  titel: string;
+  sprache: string;
+  book: string;
+  chapter: string;
+  icon: string;
+};
+
+type ShortcutResponse = {
+  books: string[];
+  chapters: ChapterOption[];
+  vocs: Voc[];
+};
+
 export default function VokabelAuswahl({ initialLanguages, initialLanguage, initialBooks, initialBook, initialChapters, initialChapter, initialVocs }: VokabelAuswahlProps) {
+  console.log("VokabelAuswahl wird gerendert");
   const [languages] = useState(initialLanguages);
   const [language, setLanguage] = useState(initialLanguage);
 
@@ -74,6 +100,8 @@ export default function VokabelAuswahl({ initialLanguages, initialLanguage, init
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const [shortcuts, setShortcuts] = useState<Shortcut[]>([]);
 
   async function fetchJson<T>(url: string): Promise<T> {
     const response = await fetch(url, {
@@ -233,78 +261,219 @@ export default function VokabelAuswahl({ initialLanguages, initialLanguage, init
     }
   }
 
+  async function handleShortcutClick(shortcut: Shortcut) {
+    try {
+      setLoading(true);
+      setError("");
+
+      const url =
+        `/api/vokabeln?action=shortcut` +
+        `&sprache=${encodeURIComponent(shortcut.sprache)}` +
+        `&book=${encodeURIComponent(shortcut.book)}` +
+        `&chapter=${encodeURIComponent(shortcut.chapter)}`;
+
+      const data = await fetchJson<ShortcutResponse>(url);
+
+      setLanguage(shortcut.sprache);
+
+      setBooks(data.books);
+      setBook(shortcut.book);
+
+      setChapters(data.chapters);
+      setChapter(shortcut.chapter);
+
+      setVocs(data.vocs);
+
+      await saveSelection(shortcut.sprache, shortcut.book, shortcut.chapter);
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "Shortcut konnte nicht geladen werden.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleSaveShortcut(shortcutId: number) {
+    try {
+      setLoading(true);
+      setError("");
+
+      const response = await fetch("/api/shortcuts", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: shortcutId,
+          sprache: language,
+          book: book,
+          chapter: chapter,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error ?? "Shortcut konnte nicht gespeichert werden.");
+      }
+
+      // Shortcut auch im lokalen State aktualisieren
+      setShortcuts((currentShortcuts) =>
+        currentShortcuts.map((shortcut) =>
+          shortcut.id === shortcutId
+            ? {
+                ...shortcut,
+                sprache: language,
+                book: book,
+                chapter: chapter,
+              }
+            : shortcut,
+        ),
+      );
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "Shortcut konnte nicht gespeichert werden.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    async function loadShortcuts() {
+      console.log("1. Shortcut-Fetch startet");
+
+      try {
+        console.log("2. Vor fetch");
+
+        const response = await fetch("/api/shortcuts");
+
+        console.log("3. Nach fetch:", response.status);
+
+        if (!response.ok) {
+          throw new Error("Shortcuts konnten nicht geladen werden.");
+        }
+
+        const data: Shortcut[] = await response.json();
+
+        console.log("4. Daten:", data);
+
+        setShortcuts(data);
+      } catch (error) {
+        console.error("5. Fehler beim Laden:", error);
+      }
+    }
+
+    loadShortcuts();
+  }, []);
+
+  console.log("Render VokabelAuswahl, shortcuts:", shortcuts);
   return (
     <section className="mx-auto w-full max-w-6xl px-3 py-4 sm:px-5 sm:py-5 lg:px-6 lg:py-6">
-      {/* Auswahlbereich */}
-      <div className="mb-6 rounded-xl border bg-card p-4 shadow-sm sm:p-5 lg:mb-8">
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {/* Sprache */}
-          <label className="block min-w-0">
-            <span className="mb-1.5 block text-sm font-semibold sm:text-base">Sprache</span>
+      <div className="rounded-xl border border-border bg-area-blue p-4 shadow-sm sm:p-5">
+        {/* Shortcuts */}
+        {shortcuts.length > 0 && (
+          <div className="mb-4 flex flex-wrap gap-2">
+            {shortcuts.map((shortcut) => {
+              const Icon = shortcutIcons[shortcut.icon as keyof typeof shortcutIcons];
 
-            <select
-              value={language}
-              onChange={(event) => void handleLanguageChange(event.target.value)}
-              disabled={loading || languages.length === 0}
-              className="w-full min-w-0 rounded-lg border border-border bg-background px-3 py-2.5 text-base text-foreground outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/30 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {languages.map((item) => (
-                <option key={item} value={item}>
-                  {item}
-                </option>
-              ))}
-            </select>
-          </label>
+              return (
+                <div key={shortcut.id} className="flex items-center gap-1">
+                  {/* Shortcut aufrufen */}
+                  <button
+                    type="button"
+                    onClick={() => void handleShortcutClick(shortcut)}
+                    disabled={loading}
+                    className="flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2 transition hover:bg-muted disabled:opacity-50"
+                  >
+                    {Icon && <Icon className="h-5 w-5" />}
+                    <span>{shortcut.titel}</span>
+                  </button>
 
-          {/* Buch */}
-          <label className="block min-w-0">
-            <span className="mb-1.5 block text-sm font-semibold sm:text-base">Buch</span>
+                  {/* Aktuelle Auswahl in diesem Shortcut speichern */}
+                  <button
+                    type="button"
+                    onClick={() => void handleSaveShortcut(shortcut.id)}
+                    disabled={loading}
+                    title="Aktuelle Auswahl als Shortcut speichern"
+                    className="rounded-lg border border-border p-2.5 transition hover:bg-muted disabled:opacity-50"
+                  >
+                    <Save className="h-4 w-4" />
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        )}
 
-            <select
-              value={book}
-              onChange={(event) => void handleBookChange(event.target.value)}
-              disabled={loading || books.length === 0}
-              className="w-full min-w-0 rounded-lg border border-border bg-background px-3 py-2.5 text-base text-foreground outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/30 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {books.map((item) => (
-                <option key={item} value={item}>
-                  {item}
-                </option>
-              ))}
-            </select>
-          </label>
+        {/* Auswahlbereich */}
+        <div className="mb-6 rounded-xl border bg-card p-4 shadow-sm sm:p-5 lg:mb-8">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {/* Sprache */}
+            <label className="block min-w-0">
+              <span className="mb-1.5 block text-sm font-semibold sm:text-base">Sprache</span>
 
-          {/* Kapitel */}
-          <label className="block min-w-0 md:col-span-2 lg:col-span-1">
-            <span className="mb-1.5 block text-sm font-semibold sm:text-base">Kapitel</span>
+              <select
+                value={language}
+                onChange={(event) => void handleLanguageChange(event.target.value)}
+                disabled={loading || languages.length === 0}
+                className="w-full min-w-0 rounded-lg border border-border bg-background px-3 py-2.5 text-base text-foreground outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/30 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {languages.map((item) => (
+                  <option key={item} value={item}>
+                    {item}
+                  </option>
+                ))}
+              </select>
+            </label>
 
-            <select
-              value={chapter}
-              onChange={(event) => void handleChapterChange(event.target.value)}
-              disabled={loading || chapters.length === 0}
-              className="w-full min-w-0 rounded-lg border border-border bg-background px-3 py-2.5 text-base text-foreground outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/30 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {chapters.map((item) => (
-                <option key={`${item.kapitel}-${item.chapter}`} value={item.chapter}>
-                  {item.chapter || `Kapitel ${item.kapitel}`}
-                </option>
-              ))}
-            </select>
-          </label>
+            {/* Buch */}
+            <label className="block min-w-0">
+              <span className="mb-1.5 block text-sm font-semibold sm:text-base">Buch</span>
+
+              <select
+                value={book}
+                onChange={(event) => void handleBookChange(event.target.value)}
+                disabled={loading || books.length === 0}
+                className="w-full min-w-0 rounded-lg border border-border bg-background px-3 py-2.5 text-base text-foreground outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/30 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {books.map((item) => (
+                  <option key={item} value={item}>
+                    {item}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            {/* Kapitel */}
+            <label className="block min-w-0 md:col-span-2 lg:col-span-1">
+              <span className="mb-1.5 block text-sm font-semibold sm:text-base">Kapitel</span>
+
+              <select
+                value={chapter}
+                onChange={(event) => void handleChapterChange(event.target.value)}
+                disabled={loading || chapters.length === 0}
+                className="w-full min-w-0 rounded-lg border border-border bg-background px-3 py-2.5 text-base text-foreground outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/30 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {chapters.map((item) => (
+                  <option key={`${item.kapitel}-${item.chapter}`} value={item.chapter}>
+                    {item.chapter || `Kapitel ${item.kapitel}`}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
         </div>
+
+        {/* Ladeanzeige */}
+        {loading && <div className="mb-4 rounded-lg bg-muted p-4 text-sm sm:text-base">Daten werden geladen …</div>}
+
+        {/* Fehler */}
+        {error && <div className="mb-4 rounded-lg border border-red-600 bg-red-50 p-4 text-sm text-red-800 sm:text-base">{error}</div>}
+        {/* Auswahlbereich */}
       </div>
-
-      {/* Ladeanzeige */}
-      {loading && <div className="mb-4 rounded-lg bg-muted p-4 text-sm sm:text-base">Daten werden geladen …</div>}
-
-      {/* Fehler */}
-      {error && <div className="mb-4 rounded-lg border border-red-600 bg-red-50 p-4 text-sm text-red-800 sm:text-base">{error}</div>}
-
       {!loading && !error && (
         <>
           {/* Überschrift */}
-          <div className="mb-5 sm:mb-6">
-            <h2 className="break-words text-xl font-bold sm:text-2xl">
+          <div className="my-10 mb-5 sm:mb-6">
+            <h2 className="wrap-break-words text-xl font-bold sm:text-2xl">
               {book}
               {chapter ? ` – ${chapter}` : ""}
             </h2>
@@ -465,27 +634,30 @@ export default function VokabelAuswahl({ initialLanguages, initialLanguage, init
                   {/* Grunddaten */}
                   <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">{/* Hier können später weitere Felder stehen */}</div>
 
-                  {/* Beispielsatz */}
-                  {voc.beispielsatz && (
+                  {/* Beispielsatz und/oder Übersetzung */}
+                  {(voc.beispielsatz || voc.beispielsatzuebersetzung) && (
                     <div className="mt-4 overflow-hidden rounded-lg bg-muted p-3 sm:mt-5 sm:p-4">
-                      <div
-                        className="wrap-break-word text-sm leading-relaxed text-muted-foreground sm:text-base [&_a]:font-medium [&_a]:text-primary [&_a]:underline [&_a]:underline-offset-2 hover:[&_a]:opacity-80"
-                        dangerouslySetInnerHTML={{
-                          __html: voc.beispielsatz,
-                        }}
-                      />
+                      {/* Beispielsatz */}
+                      {voc.beispielsatz && (
+                        <div
+                          className="wrap-break-word text-sm leading-relaxed text-muted-foreground sm:text-base [&_a]:font-medium [&_a]:text-primary [&_a]:underline [&_a]:underline-offset-2 hover:[&_a]:opacity-80"
+                          dangerouslySetInnerHTML={{
+                            __html: voc.beispielsatz,
+                          }}
+                        />
+                      )}
 
+                      {/* Trennlinie nur, wenn BEIDE vorhanden sind */}
+                      {voc.beispielsatz && voc.beispielsatzuebersetzung && <div className="my-3 border-t border-border" />}
+
+                      {/* Beispielsatz-Übersetzung */}
                       {voc.beispielsatzuebersetzung && (
-                        <>
-                          <div className="my-3 border-t border-border" />
-
-                          <div
-                            className="wrap-break-word text-sm leading-relaxed text-muted-foreground sm:text-base [&_a]:font-medium [&_a]:text-primary [&_a]:underline [&_a]:underline-offset-2 hover:[&_a]:opacity-80"
-                            dangerouslySetInnerHTML={{
-                              __html: voc.beispielsatzuebersetzung,
-                            }}
-                          />
-                        </>
+                        <div
+                          className="wrap-break-word text-sm leading-relaxed text-muted-foreground sm:text-base [&_a]:font-medium [&_a]:text-primary [&_a]:underline [&_a]:underline-offset-2 hover:[&_a]:opacity-80"
+                          dangerouslySetInnerHTML={{
+                            __html: voc.beispielsatzuebersetzung,
+                          }}
+                        />
                       )}
                     </div>
                   )}

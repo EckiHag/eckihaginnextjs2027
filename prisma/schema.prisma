@@ -184,3 +184,21 @@ model UserEckiHack {
 
   @@map("userseckihack")
 }
+
+model Shortcut {
+  id        Int      @id @default(autoincrement())
+
+  titel     String   @db.VarChar(100)
+
+  sprache   String   @db.VarChar(20)
+  book      String   @db.VarChar(99)
+  chapter   String   @db.VarChar(99)
+
+  icon      String   @db.VarChar(50)
+
+  sort      Int      @default(0)
+  aktiv     Boolean  @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
