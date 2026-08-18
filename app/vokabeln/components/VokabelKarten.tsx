@@ -1,24 +1,5 @@
 import { useState } from "react";
-
-type Voc = {
-  id: number;
-  ord: number;
-  art: string;
-  artikel: string;
-  wort: string;
-  geschlecht: string;
-  aussprache: string;
-  uebersetzung: string;
-  beispielsatz: string;
-  beispielsatzuebersetzung: string;
-  eigenerKommentar: string;
-  sprache: string;
-  book: string;
-  chapter: string;
-  schwierigkeitsgrad: number;
-  kapitel: number;
-  kapiteltext: string;
-};
+import type { Voc } from "../types";
 
 type VokabelKartenProps = {
   vocs: Voc[];
@@ -198,7 +179,12 @@ export default function VokabelKarten({ vocs, setVocs }: VokabelKartenProps) {
                 <div className="min-w-0">
                   <h3 className="wrap-break-words text-lg font-bold sm:text-xl">
                     {voc.artikel ? `${voc.artikel} ` : ""}
-                    {voc.wort}
+                    <div
+                      className="wrap-break-word text-sm leading-relaxed text-muted-foreground sm:text-base [&_a]:font-medium [&_a]:text-primary [&_a]:underline [&_a]:underline-offset-2 hover:[&_a]:opacity-80"
+                      dangerouslySetInnerHTML={{
+                        __html: voc.wort,
+                      }}
+                    />
                   </h3>
                 </div>
 

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { BookOpen, BookMarked, NotebookPen, Languages, Boxes, ScrollText, BookText, Save } from "lucide-react";
 import VokabelKarten from "./components/VokabelKarten";
+import VokabelListe from "./components/VokabelListe";
 
 const shortcutIcons = {
   BookOpen,
@@ -101,6 +102,8 @@ export default function VokabelAuswahl({ initialLanguages, initialLanguage, init
   const [error, setError] = useState("");
 
   const [shortcuts, setShortcuts] = useState<Shortcut[]>([]);
+
+  const [viewMode, setViewMode] = useState<"karten" | "liste">("karten");
 
   async function fetchJson<T>(url: string): Promise<T> {
     const response = await fetch(url, {
@@ -445,8 +448,29 @@ export default function VokabelAuswahl({ initialLanguages, initialLanguage, init
               Für diese Auswahl sind keine Datensätze vorhanden.
             </div>
           ) : (
-            <div className="grid gap-3 sm:gap-4">
-              <VokabelKarten vocs={vocs} setVocs={setVocs} />
+            <div>
+              <div className="mb-4 flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setViewMode("karten")}
+                  className={`rounded-lg px-4 py-2 text-sm font-medium ${viewMode === "karten" ? "bg-primary text-primary-foreground" : "border border-border hover:bg-muted"}`}
+                >
+                  Karten
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setViewMode("liste")}
+                  className={`rounded-lg px-4 py-2 text-sm font-medium ${viewMode === "liste" ? "bg-primary text-primary-foreground" : "border border-border hover:bg-muted"}`}
+                >
+                  Liste
+                </button>
+              </div>
+              <div className="grid gap-3 sm:gap-4">
+                {viewMode === "karten" && <VokabelKarten vocs={vocs} setVocs={setVocs} />}
+
+                {viewMode === "liste" && <VokabelListe vocs={vocs} />}
+              </div>
             </div>
           )}
         </>
