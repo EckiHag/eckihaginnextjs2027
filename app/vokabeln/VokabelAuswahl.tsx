@@ -5,6 +5,7 @@ import { BookOpen, BookMarked, NotebookPen, Languages, Boxes, ScrollText, BookTe
 import VokabelKarten from "./components/VokabelKarten";
 import VokabelListe from "./components/VokabelListe";
 import VokabelkartenGross from "./components/drucken/VokabelkartenGross";
+import VokabelkartenKlein from "./components/drucken/VokabelkartenKlein";
 
 const shortcutIcons = {
   BookOpen,
@@ -328,7 +329,6 @@ export default function VokabelAuswahl({ initialLanguages, initialLanguage, init
   console.log("Render VokabelAuswahl, shortcuts:", shortcuts);
   return (
     <section className="mx-auto w-full max-w-6xl px-3 py-4 sm:px-5 sm:py-5 lg:px-6 lg:py-6">
-      <VokabelkartenGross vocs={vocs} />
       <div className="rounded-xl border border-border bg-area-blue p-4 shadow-sm sm:p-5">
         {/* Shortcuts */}
         {shortcuts.length > 0 && (
@@ -430,6 +430,11 @@ export default function VokabelAuswahl({ initialLanguages, initialLanguage, init
         {/* Fehler */}
         {error && <div className="mb-4 rounded-lg border border-red-600 bg-red-50 p-4 text-sm text-red-800 sm:text-base">{error}</div>}
         {/* Auswahlbereich */}
+      </div>
+      <div>
+        <VokabelkartenGross vocs={vocs} />
+
+        <VokabelkartenKlein vocs={vocs} />
       </div>
       {!loading && !error && (
         <>
