@@ -21,23 +21,23 @@ import type { UserRole } from "@/app/generated/prisma/client";
 type AppSidebarProps = {
   userRole?: UserRole;
 };
-const vocabularyNavigation = [
-  {
-    title: "Anzeigen",
-    href: "/vokabeln",
-    icon: List,
-  },
-  {
-    title: "Suchen",
-    href: "/vokabeln/suchen",
-    icon: Search,
-  },
-  {
-    title: "Drucken",
-    href: "/vokabeln/drucken",
-    icon: Printer,
-  },
-];
+// const vocabularyNavigation = [
+//   {
+//     title: "Anzeigen",
+//     href: "/vokabeln",
+//     icon: List,
+//   },
+//   {
+//     title: "Suchen",
+//     href: "/vokabeln/suchen",
+//     icon: Search,
+//   },
+//   {
+//     title: "Drucken",
+//     href: "/vokabeln/drucken",
+//     icon: Printer,
+//   },
+// ];
 const spielenNavigation = [
   {
     title: "Pacman",
@@ -148,35 +148,14 @@ export function AppSidebar({ userRole }: AppSidebarProps) {
                 <SidebarMenu>
                   <SidebarMenuItem>
                     <SidebarMenuButton
-                      type="button"
+                      render={<Link href="/vokabeln" onClick={closeMobileSidebar} />}
                       tooltip="Vokabeln"
-                      isActive={vocabularyIsActive}
-                      onClick={() => setVocabularyOpen((open) => !open)}
-                      className={vocabularyIsActive ? "bg-amber-100 font-semibold text-amber-900 hover:bg-amber-200" : "hover:bg-muted"}
+                      isActive={pathname === "/vokabeln"}
+                      className={pathname === "/vokabeln" ? "bg-amber-100 font-semibold text-amber-900 hover:bg-amber-200" : "hover:bg-muted"}
                     >
                       <Languages />
                       <span>Vokabeln</span>
-
-                      <ChevronDown className={`ml-auto transition-transform ${vocabularyOpen ? "rotate-180" : ""}`} />
                     </SidebarMenuButton>
-
-                    {vocabularyOpen && (
-                      <ul className="ml-5 mt-1 space-y-1 border-l pl-3">
-                        {vocabularyNavigation.map((item) => (
-                          <li key={item.href}>
-                            <SidebarMenuButton
-                              render={<Link href={item.href} onClick={closeMobileSidebar} />}
-                              tooltip={item.title}
-                              isActive={pathname === item.href}
-                              className={pathname === item.href ? "bg-amber-100 font-semibold text-amber-900 hover:bg-amber-200" : "hover:bg-muted"}
-                            >
-                              <item.icon />
-                              <span>{item.title}</span>
-                            </SidebarMenuButton>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
                   </SidebarMenuItem>
 
                   <SidebarMenuItem>

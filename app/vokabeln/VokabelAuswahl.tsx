@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { BookOpen, BookMarked, NotebookPen, Languages, Boxes, ScrollText, BookText, Save } from "lucide-react";
 import VokabelKarten from "./components/VokabelKarten";
 import VokabelListe from "./components/VokabelListe";
+import VokabelkartenGross from "./components/drucken/VokabelkartenGross";
 
 const shortcutIcons = {
   BookOpen,
@@ -327,6 +328,7 @@ export default function VokabelAuswahl({ initialLanguages, initialLanguage, init
   console.log("Render VokabelAuswahl, shortcuts:", shortcuts);
   return (
     <section className="mx-auto w-full max-w-6xl px-3 py-4 sm:px-5 sm:py-5 lg:px-6 lg:py-6">
+      <VokabelkartenGross vocs={vocs} />
       <div className="rounded-xl border border-border bg-area-blue p-4 shadow-sm sm:p-5">
         {/* Shortcuts */}
         {shortcuts.length > 0 && (
