@@ -326,7 +326,6 @@ export default function VokabelAuswahl({ initialLanguages, initialLanguage, init
     loadShortcuts();
   }, []);
 
-  console.log("Render VokabelAuswahl, shortcuts:", shortcuts);
   return (
     <section className="mx-auto w-full max-w-6xl px-3 py-4 sm:px-5 sm:py-5 lg:px-6 lg:py-6">
       <div className="rounded-xl border border-border bg-area-blue p-4 shadow-sm sm:p-5">

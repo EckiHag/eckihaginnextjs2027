@@ -1,7 +1,7 @@
 "use client";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { ChevronDown, Database, Home, Languages, List, Printer, Search, Users } from "lucide-react";
+import { ChevronDown, Database, Home, Languages, List, Printer, Search, Users, CalendarDays } from "lucide-react";
 import { useRef, useState } from "react";
 import {
   Sidebar,
@@ -72,8 +72,8 @@ export function AppSidebar({ userRole }: AppSidebarProps) {
   const pathname = usePathname();
   const { isMobile, setOpenMobile } = useSidebar();
   const touchStartX = useRef<number | null>(null);
-  const vocabularyIsActive = pathname.startsWith("/vokabeln");
-  const [vocabularyOpen, setVocabularyOpen] = useState(vocabularyIsActive);
+  // const vocabularyIsActive = pathname.startsWith("/vokabeln");
+  // const [vocabularyOpen, setVocabularyOpen] = useState(vocabularyIsActive);
 
   const spielenIsActive = pathname.startsWith("/spielen");
   const [spielenOpen, setSpielenOpen] = useState(spielenIsActive);
@@ -145,6 +145,7 @@ export function AppSidebar({ userRole }: AppSidebarProps) {
               <SidebarGroupLabel>Datenbank haggipapi</SidebarGroupLabel>
 
               <SidebarGroupContent>
+                {/* ---Vokabeln--- */}
                 <SidebarMenu>
                   <SidebarMenuItem>
                     <SidebarMenuButton
@@ -157,7 +158,7 @@ export function AppSidebar({ userRole }: AppSidebarProps) {
                       <span>Vokabeln</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
-
+                  {/* ---Daten--- */}
                   <SidebarMenuItem>
                     <SidebarMenuButton
                       render={<Link href="/daten" onClick={closeMobileSidebar} />}
@@ -167,6 +168,18 @@ export function AppSidebar({ userRole }: AppSidebarProps) {
                     >
                       <Users />
                       <span>Daten</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  {/* ---Kalender--- */}
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      render={<Link href="/kalender" onClick={closeMobileSidebar} />}
+                      tooltip="Daten"
+                      isActive={pathname === "/kalender"}
+                      className={pathname === "/kalender" ? "bg-amber-100 font-semibold text-amber-900 hover:bg-amber-200" : "hover:bg-muted"}
+                    >
+                      <CalendarDays className="h-5 w-5" />
+                      <span>Kalender</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 </SidebarMenu>
