@@ -1,7 +1,7 @@
 "use client";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { ChevronDown, Database, Home, Languages, List, Printer, Search, Users, CalendarDays } from "lucide-react";
+import { ChevronDown, Database, Home, Languages, List, Printer, Search, Users, CalendarDays, PersonStanding, Ghost, CircleDot, PanelsTopLeft } from "lucide-react";
 import { useRef, useState } from "react";
 import {
   Sidebar,
@@ -38,21 +38,26 @@ type AppSidebarProps = {
 //     icon: Printer,
 //   },
 // ];
-const spielenNavigation = [
+const gamesNavigation = [
+  {
+    title: "Hangman",
+    href: "/games/hangman",
+    icon: PersonStanding,
+  },
   {
     title: "Pacman",
-    href: "/spielen/pacman",
-    icon: List,
+    href: "/games/pacman",
+    icon: Ghost,
   },
   {
     title: "Vier gewinnt",
-    href: "/spielen/viergewinnt",
-    icon: Search,
+    href: "/games/viergewinnt",
+    icon: CircleDot,
   },
   {
     title: "Memory",
-    href: "/spielen/memory",
-    icon: Printer,
+    href: "/games/memory",
+    icon: PanelsTopLeft,
   },
 ];
 const administrationNavigation = [
@@ -75,8 +80,8 @@ export function AppSidebar({ userRole }: AppSidebarProps) {
   // const vocabularyIsActive = pathname.startsWith("/vokabeln");
   // const [vocabularyOpen, setVocabularyOpen] = useState(vocabularyIsActive);
 
-  const spielenIsActive = pathname.startsWith("/spielen");
-  const [spielenOpen, setSpielenOpen] = useState(spielenIsActive);
+  const gamesIsActive = pathname.startsWith("/games");
+  const [gamesOpen, setGamesOpen] = useState(gamesIsActive);
 
   function handleTouchStart(event: React.TouchEvent) {
     const x = event.touches[0].clientX;
@@ -218,18 +223,18 @@ export function AppSidebar({ userRole }: AppSidebarProps) {
                   <SidebarMenuButton
                     type="button"
                     tooltip="Spielen"
-                    isActive={spielenIsActive}
-                    onClick={() => setSpielenOpen((open) => !open)}
-                    className={spielenIsActive ? "bg-amber-100 font-semibold text-amber-900 hover:bg-amber-200" : "hover:bg-muted"}
+                    isActive={gamesIsActive}
+                    onClick={() => setGamesOpen((open) => !open)}
+                    className={gamesIsActive ? "bg-amber-100 font-semibold text-amber-900 hover:bg-amber-200" : "hover:bg-muted"}
                   >
                     <span>Eigene</span>
 
-                    <ChevronDown className={`ml-auto transition-transform ${spielenOpen ? "rotate-180" : ""}`} />
+                    <ChevronDown className={`ml-auto transition-transform ${gamesOpen ? "rotate-180" : ""}`} />
                   </SidebarMenuButton>
 
-                  {spielenOpen && (
+                  {gamesOpen && (
                     <ul className="ml-5 mt-1 space-y-1 border-l pl-3">
-                      {spielenNavigation.map((item) => (
+                      {gamesNavigation.map((item) => (
                         <li key={item.href}>
                           <SidebarMenuButton
                             render={<Link href={item.href} onClick={closeMobileSidebar} />}
@@ -244,18 +249,6 @@ export function AppSidebar({ userRole }: AppSidebarProps) {
                       ))}
                     </ul>
                   )}
-                </SidebarMenuItem>
-
-                <SidebarMenuItem>
-                  <SidebarMenuButton
-                    render={<Link href="/hangman" onClick={closeMobileSidebar} />}
-                    tooltip="hangman"
-                    isActive={pathname === "/hangman"}
-                    className={pathname === "/hangman" ? "bg-amber-100 font-semibold text-amber-900 hover:bg-amber-200" : "hover:bg-muted"}
-                  >
-                    <Users />
-                    <span>Hangman</span>
-                  </SidebarMenuButton>
                 </SidebarMenuItem>
               </SidebarMenu>
             </SidebarGroupContent>
