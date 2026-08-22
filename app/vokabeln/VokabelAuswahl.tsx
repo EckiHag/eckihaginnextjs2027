@@ -99,6 +99,7 @@ export default function VokabelAuswahl({ initialLanguages, initialLanguage, init
   const [chapter, setChapter] = useState(initialChapter);
 
   const [vocs, setVocs] = useState<Voc[]>(initialVocs);
+  const [search, setSearch] = useState("");
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -326,6 +327,21 @@ export default function VokabelAuswahl({ initialLanguages, initialLanguage, init
     loadShortcuts();
   }, []);
 
+  const searchText = search.toLowerCase().trim();
+
+  const filteredVocs = vocs.filter((voc) => {
+    if (!searchText) {
+      return true;
+    }
+
+    return (
+      voc.wort?.toLowerCase().includes(searchText) ||
+      voc.uebersetzung?.toLowerCase().includes(searchText) ||
+      voc.beispielsatz?.toLowerCase().includes(searchText) ||
+      voc.beispielsatzuebersetzung?.toLowerCase().includes(searchText)
+    );
+  });
+
   return (
     <section className="mx-auto w-full max-w-6xl px-3 py-4 sm:px-5 sm:py-5 lg:px-6 lg:py-6">
       <div className="rounded-xl border border-border bg-area-blue p-4 shadow-sm sm:p-5">
@@ -423,6 +439,21 @@ export default function VokabelAuswahl({ initialLanguages, initialLanguage, init
           </div>
         </div>
 
+        {/* Suche */}
+        <div className="mb-6">
+          <label className="block">
+            <span className="mb-1.5 block text-sm font-semibold sm:text-base">Suche</span>
+
+            <input
+              type="text"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Wort, Übersetzung oder Beispielsatz suchen ..."
+              className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-base text-foreground outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/30"
+            />
+          </label>
+        </div>
+
         {/* Ladeanzeige */}
         {loading && <div className="mb-4 rounded-lg bg-muted p-4 text-sm sm:text-base">Daten werden geladen …</div>}
 
@@ -445,13 +476,21 @@ export default function VokabelAuswahl({ initialLanguages, initialLanguage, init
             </h2>
 
             <p className="mt-1 text-sm text-muted-foreground sm:text-base">
-              {vocs.length} {vocs.length === 1 ? "Datensatz" : "Datensätze"}
+              {search ? (
+                <>
+                  {filteredVocs.length} von {vocs.length} Datensätzen gefunden
+                </>
+              ) : (
+                <>
+                  {vocs.length} {vocs.length === 1 ? "Datensatz" : "Datensätze"}
+                </>
+              )}
             </p>
           </div>
 
-          {vocs.length === 0 ? (
+          {filteredVocs.length === 0 ? (
             <div className="rounded-xl border border-dashed border-border p-5 text-center text-sm text-muted-foreground sm:p-6 sm:text-base">
-              Für diese Auswahl sind keine Datensätze vorhanden.
+              {search ? "Keine Datensätze entsprechen der Suche." : "Für diese Auswahl sind keine Datensätze vorhanden."}
             </div>
           ) : (
             <div>
@@ -473,9 +512,9 @@ export default function VokabelAuswahl({ initialLanguages, initialLanguage, init
                 </button>
               </div>
               <div className="grid gap-3 sm:gap-4">
-                {viewMode === "karten" && <VokabelKarten vocs={vocs} setVocs={setVocs} />}
+                {viewMode === "karten" && <VokabelKarten vocs={filteredVocs} setVocs={setVocs} />}
 
-                {viewMode === "liste" && <VokabelListe vocs={vocs} />}
+                {viewMode === "liste" && <VokabelListe vocs={filteredVocs} />}
               </div>
             </div>
           )}
