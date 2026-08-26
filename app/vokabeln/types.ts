@@ -13,6 +13,7 @@ export type Voc = {
   sprache: string;
   book: string;
   chapter: string;
+  datum: Date;
   schwierigkeitsgrad: number;
   kapitel: number;
   kapiteltext: string;

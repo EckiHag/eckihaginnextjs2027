@@ -6,6 +6,7 @@ import VokabelKarten from "./components/VokabelKarten";
 import VokabelListe from "./components/VokabelListe";
 import VokabelkartenGross from "./components/drucken/VokabelkartenGross";
 import VokabelkartenKlein from "./components/drucken/VokabelkartenKlein";
+import type { Voc } from "./types";
 
 const shortcutIcons = {
   BookOpen,
@@ -19,26 +20,6 @@ const shortcutIcons = {
 type ChapterOption = {
   chapter: string;
   kapitel: number;
-};
-
-type Voc = {
-  id: number;
-  ord: number;
-  art: string;
-  artikel: string;
-  wort: string;
-  geschlecht: string;
-  aussprache: string;
-  uebersetzung: string;
-  beispielsatz: string;
-  beispielsatzuebersetzung: string;
-  eigenerKommentar: string;
-  sprache: string;
-  book: string;
-  chapter: string;
-  schwierigkeitsgrad: number;
-  kapitel: number;
-  kapiteltext: string;
 };
 
 type VokabelAuswahlProps = {
@@ -100,6 +81,10 @@ export default function VokabelAuswahl({ initialLanguages, initialLanguage, init
 
   const [vocs, setVocs] = useState<Voc[]>(initialVocs);
   const [search, setSearch] = useState("");
+
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editVoc, setEditVoc] = useState<Voc | null>(null);
+  const [saving, setSaving] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -299,6 +284,51 @@ export default function VokabelAuswahl({ initialLanguages, initialLanguage, init
     }
   }
 
+  function startEditing(voc: Voc) {
+    setEditingId(voc.id);
+    setEditVoc({ ...voc });
+  }
+
+  function cancelEditing() {
+    setEditingId(null);
+    setEditVoc(null);
+  }
+
+  async function saveVoc() {
+    if (!editVoc) {
+      return;
+    }
+
+    try {
+      setSaving(true);
+      setError("");
+
+      const response = await fetch("/api/vokabeln/update", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(editVoc),
+      });
+
+      const text = await response.text();
+
+      if (!response.ok) {
+        throw new Error(`Fehler ${response.status}: ${text.slice(0, 300)}`);
+      }
+
+      const data = JSON.parse(text);
+
+      setVocs((currentVocs) => currentVocs.map((voc) => (voc.id === data.voc.id ? data.voc : voc)));
+
+      cancelEditing();
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "Die Vokabel konnte nicht gespeichert werden.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
   useEffect(() => {
     async function loadShortcuts() {
       console.log("1. Shortcut-Fetch startet");
@@ -466,6 +496,7 @@ export default function VokabelAuswahl({ initialLanguages, initialLanguage, init
 
         <VokabelkartenKlein vocs={vocs} />
       </div>
+
       {!loading && !error && (
         <>
           {/* Überschrift */}
@@ -512,9 +543,30 @@ export default function VokabelAuswahl({ initialLanguages, initialLanguage, init
                 </button>
               </div>
               <div className="grid gap-3 sm:gap-4">
-                {viewMode === "karten" && <VokabelKarten vocs={filteredVocs} setVocs={setVocs} />}
-
-                {viewMode === "liste" && <VokabelListe vocs={filteredVocs} />}
+                {viewMode === "karten" && (
+                  <VokabelKarten
+                    vocs={filteredVocs}
+                    editingId={editingId}
+                    editVoc={editVoc}
+                    setEditVoc={setEditVoc}
+                    onEdit={startEditing}
+                    onSave={() => void saveVoc()}
+                    onCancel={cancelEditing}
+                    saving={saving}
+                  />
+                )}
+                {viewMode === "liste" && (
+                  <VokabelListe
+                    vocs={filteredVocs}
+                    editingId={editingId}
+                    editVoc={editVoc}
+                    setEditVoc={setEditVoc}
+                    onEdit={startEditing}
+                    onSave={() => void saveVoc()}
+                    onCancel={cancelEditing}
+                    saving={saving}
+                  />
+                )}
               </div>
             </div>
           )}
