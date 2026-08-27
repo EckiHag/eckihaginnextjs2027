@@ -91,7 +91,7 @@ export default function VokabelAuswahl({ initialLanguages, initialLanguage, init
 
   const [shortcuts, setShortcuts] = useState<Shortcut[]>([]);
 
-  const [viewMode, setViewMode] = useState<"karten" | "liste">("karten");
+  const [viewMode, setViewMode] = useState<"liste" | "karten">("liste");
 
   async function fetchJson<T>(url: string): Promise<T> {
     const response = await fetch(url, {
@@ -528,23 +528,22 @@ export default function VokabelAuswahl({ initialLanguages, initialLanguage, init
               <div className="mb-4 flex gap-2">
                 <button
                   type="button"
-                  onClick={() => setViewMode("karten")}
-                  className={`rounded-lg px-4 py-2 text-sm font-medium ${viewMode === "karten" ? "bg-primary text-primary-foreground" : "border border-border hover:bg-muted"}`}
-                >
-                  Karten
-                </button>
-
-                <button
-                  type="button"
                   onClick={() => setViewMode("liste")}
                   className={`rounded-lg px-4 py-2 text-sm font-medium ${viewMode === "liste" ? "bg-primary text-primary-foreground" : "border border-border hover:bg-muted"}`}
                 >
                   Liste
                 </button>
+                <button
+                  type="button"
+                  onClick={() => setViewMode("karten")}
+                  className={`rounded-lg px-4 py-2 text-sm font-medium ${viewMode === "karten" ? "bg-primary text-primary-foreground" : "border border-border hover:bg-muted"}`}
+                >
+                  Karten
+                </button>
               </div>
               <div className="grid gap-3 sm:gap-4">
-                {viewMode === "karten" && (
-                  <VokabelKarten
+                {viewMode === "liste" && (
+                  <VokabelListe
                     vocs={filteredVocs}
                     editingId={editingId}
                     editVoc={editVoc}
@@ -555,8 +554,8 @@ export default function VokabelAuswahl({ initialLanguages, initialLanguage, init
                     saving={saving}
                   />
                 )}
-                {viewMode === "liste" && (
-                  <VokabelListe
+                {viewMode === "karten" && (
+                  <VokabelKarten
                     vocs={filteredVocs}
                     editingId={editingId}
                     editVoc={editVoc}
