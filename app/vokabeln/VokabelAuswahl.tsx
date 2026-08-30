@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { BookOpen, BookMarked, NotebookPen, Languages, Boxes, ScrollText, BookText, Save } from "lucide-react";
+import { BookOpen, BookMarked, NotebookPen, Languages, Boxes, ScrollText, BookText, Save, LoaderCircle } from "lucide-react";
 import VokabelKarten from "./components/VokabelKarten";
 import VokabelListe from "./components/VokabelListe";
 import VokabelkartenGross from "./components/drucken/VokabelkartenGross";
@@ -128,14 +128,13 @@ export default function VokabelAuswahl({ initialLanguages, initialLanguage, init
 
       setLanguage(newLanguage);
 
-      /*
-       * Die alten untergeordneten Werte werden sofort entfernt.
-       */
       setBooks([]);
       setBook("");
       setChapters([]);
       setChapter("");
-      setVocs([]);
+
+      // NICHT MEHR:
+      // setVocs([]);
 
       const url = `/api/vokabeln?action=sprache` + `&sprache=${encodeURIComponent(newLanguage)}`;
 
@@ -147,7 +146,9 @@ export default function VokabelAuswahl({ initialLanguages, initialLanguage, init
       setChapters(data.chapters);
       setChapter(data.selectedChapter);
 
+      // Erst jetzt alte Vokabeln ersetzen
       setVocs(data.vocs);
+
       await saveSelection(newLanguage, data.selectedBook, data.selectedChapter);
     } catch (error) {
       setError(error instanceof Error ? error.message : "Unbekannter Fehler");
@@ -163,15 +164,11 @@ export default function VokabelAuswahl({ initialLanguages, initialLanguage, init
 
       setBook(newBook);
 
-      /*
-       * Bei einem Buchwechsel bleiben Sprache
-       * und Bücherliste bestehen.
-       *
-       * Nur Kapitel und Inhalt werden erneuert.
-       */
       setChapters([]);
       setChapter("");
-      setVocs([]);
+
+      // ENTFERNEN:
+      // setVocs([]);
 
       const url = `/api/vokabeln?action=book` + `&sprache=${encodeURIComponent(language)}` + `&book=${encodeURIComponent(newBook)}`;
 
@@ -179,7 +176,10 @@ export default function VokabelAuswahl({ initialLanguages, initialLanguage, init
 
       setChapters(data.chapters);
       setChapter(data.selectedChapter);
+
+      // Erst nach dem Laden ersetzen
       setVocs(data.vocs);
+
       await saveSelection(language, newBook, data.selectedChapter);
     } catch (error) {
       setError(error instanceof Error ? error.message : "Unbekannter Fehler");
@@ -194,13 +194,17 @@ export default function VokabelAuswahl({ initialLanguages, initialLanguage, init
       setError("");
 
       setChapter(newChapter);
-      setVocs([]);
+
+      // ENTFERNEN:
+      // setVocs([]);
 
       const url = `/api/vokabeln?action=chapter` + `&sprache=${encodeURIComponent(language)}` + `&book=${encodeURIComponent(book)}` + `&chapter=${encodeURIComponent(newChapter)}`;
 
       const data = await fetchJson<ChapterResponse>(url);
 
+      // Erst hier austauschen
       setVocs(data.vocs);
+
       await saveSelection(language, book, newChapter);
     } catch (error) {
       setError(error instanceof Error ? error.message : "Unbekannter Fehler");
@@ -484,93 +488,107 @@ export default function VokabelAuswahl({ initialLanguages, initialLanguage, init
           </label>
         </div>
 
-        {/* Ladeanzeige */}
-        {loading && <div className="mb-4 rounded-lg bg-muted p-4 text-sm sm:text-base">Daten werden geladen …</div>}
-
         {/* Fehler */}
         {error && <div className="mb-4 rounded-lg border border-red-600 bg-red-50 p-4 text-sm text-red-800 sm:text-base">{error}</div>}
-        {/* Auswahlbereich */}
-      </div>
-      <div>
-        <VokabelkartenGross vocs={vocs} />
-
-        <VokabelkartenKlein vocs={vocs} />
       </div>
 
-      {!loading && !error && (
-        <>
-          {/* Überschrift */}
-          <div className="my-10 mb-5 sm:mb-6">
-            <h2 className="wrap-break-words text-xl font-bold sm:text-2xl">
-              {book}
-              {chapter ? ` – ${chapter}` : ""}
-            </h2>
+      {/* Gesamter Vokabelbereich */}
+      <div className="relative">
+        {/* Halbtransparentes Lade-Overlay */}
+        {loading && (
+          <div className="absolute inset-0 z-50 flex items-start justify-center bg-background/50 pt-24 backdrop-blur-[1px]">
+            <div className="flex items-center gap-3 rounded-lg border border-border bg-card/95 px-5 py-4 shadow-lg">
+              <LoaderCircle className="h-7 w-7 animate-spin text-primary" />
 
-            <p className="mt-1 text-sm text-muted-foreground sm:text-base">
-              {search ? (
-                <>
-                  {filteredVocs.length} von {vocs.length} Datensätzen gefunden
-                </>
-              ) : (
-                <>
-                  {vocs.length} {vocs.length === 1 ? "Datensatz" : "Datensätze"}
-                </>
-              )}
-            </p>
+              <span className="text-sm font-medium sm:text-base">Refesh …</span>
+            </div>
           </div>
+        )}
 
-          {filteredVocs.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-border p-5 text-center text-sm text-muted-foreground sm:p-6 sm:text-base">
-              {search ? "Keine Datensätze entsprechen der Suche." : "Für diese Auswahl sind keine Datensätze vorhanden."}
-            </div>
-          ) : (
-            <div>
-              <div className="mb-4 flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => setViewMode("liste")}
-                  className={`rounded-lg px-4 py-2 text-sm font-medium ${viewMode === "liste" ? "bg-primary text-primary-foreground" : "border border-border hover:bg-muted"}`}
-                >
-                  Liste
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setViewMode("karten")}
-                  className={`rounded-lg px-4 py-2 text-sm font-medium ${viewMode === "karten" ? "bg-primary text-primary-foreground" : "border border-border hover:bg-muted"}`}
-                >
-                  Karten
-                </button>
-              </div>
-              <div className="grid gap-3 sm:gap-4">
-                {viewMode === "liste" && (
-                  <VokabelListe
-                    vocs={filteredVocs}
-                    editingId={editingId}
-                    editVoc={editVoc}
-                    setEditVoc={setEditVoc}
-                    onEdit={startEditing}
-                    onSave={() => void saveVoc()}
-                    onCancel={cancelEditing}
-                    saving={saving}
-                  />
+        {/* Vokabelkarten Druckansicht */}
+        <div>
+          <VokabelkartenGross vocs={vocs} />
+          <VokabelkartenKlein vocs={vocs} />
+        </div>
+
+        {!error && (
+          <>
+            {/* Überschrift */}
+            <div className="my-10 mb-5 sm:mb-6">
+              <h2 className="wrap-break-words text-xl font-bold sm:text-2xl">
+                {book}
+                {chapter ? ` – ${chapter}` : ""}
+              </h2>
+
+              <p className="mt-1 text-sm text-muted-foreground sm:text-base">
+                {search ? (
+                  <>
+                    {filteredVocs.length} von {vocs.length} Datensätzen gefunden
+                  </>
+                ) : (
+                  <>
+                    {vocs.length} {vocs.length === 1 ? "Datensatz" : "Datensätze"}
+                  </>
                 )}
-                {viewMode === "karten" && (
-                  <VokabelKarten
-                    vocs={filteredVocs}
-                    editingId={editingId}
-                    editVoc={editVoc}
-                    setEditVoc={setEditVoc}
-                    onEdit={startEditing}
-                    onSave={() => void saveVoc()}
-                    onCancel={cancelEditing}
-                    saving={saving}
-                  />
-                )}
-              </div>
+              </p>
             </div>
-          )}
-        </>
-      )}
+
+            {filteredVocs.length === 0 ? (
+              <div className="rounded-xl border border-dashed border-border p-5 text-center text-sm text-muted-foreground sm:p-6 sm:text-base">
+                {search ? "Keine Datensätze entsprechen der Suche." : "Für diese Auswahl sind keine Datensätze vorhanden."}
+              </div>
+            ) : (
+              <div>
+                <div className="mb-4 flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setViewMode("liste")}
+                    className={`rounded-lg px-4 py-2 text-sm font-medium ${viewMode === "liste" ? "bg-primary text-primary-foreground" : "border border-border hover:bg-muted"}`}
+                  >
+                    Liste
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setViewMode("karten")}
+                    className={`rounded-lg px-4 py-2 text-sm font-medium ${viewMode === "karten" ? "bg-primary text-primary-foreground" : "border border-border hover:bg-muted"}`}
+                  >
+                    Karten
+                  </button>
+                </div>
+
+                <div className="grid gap-3 sm:gap-4">
+                  {viewMode === "liste" && (
+                    <VokabelListe
+                      vocs={filteredVocs}
+                      editingId={editingId}
+                      editVoc={editVoc}
+                      setEditVoc={setEditVoc}
+                      onEdit={startEditing}
+                      onSave={() => void saveVoc()}
+                      onCancel={cancelEditing}
+                      saving={saving}
+                    />
+                  )}
+
+                  {viewMode === "karten" && (
+                    <VokabelKarten
+                      vocs={filteredVocs}
+                      editingId={editingId}
+                      editVoc={editVoc}
+                      setEditVoc={setEditVoc}
+                      onEdit={startEditing}
+                      onSave={() => void saveVoc()}
+                      onCancel={cancelEditing}
+                      saving={saving}
+                    />
+                  )}
+                </div>
+              </div>
+            )}
+          </>
+        )}
+      </div>
     </section>
   );
 }
