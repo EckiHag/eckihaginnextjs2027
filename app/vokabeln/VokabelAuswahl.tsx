@@ -496,15 +496,26 @@ export default function VokabelAuswahl({ initialLanguages, initialLanguage, init
       <div className="relative">
         {/* Halbtransparentes Lade-Overlay */}
         {loading && (
-          <div className="absolute inset-0 z-50 flex items-start justify-center bg-background/50 pt-24 backdrop-blur-[1px]">
-            <div className="flex items-center gap-3 rounded-lg border border-border bg-card/95 px-5 py-4 shadow-lg">
-              <LoaderCircle className="h-7 w-7 animate-spin text-primary" />
+          <>
+            {/* Mobile: über dem sichtbaren Bildschirm */}
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/50 backdrop-blur-[1px] md:hidden">
+              <div className="flex items-center gap-3 rounded-lg border border-border bg-card/95 px-5 py-4 shadow-lg">
+                <LoaderCircle className="h-7 w-7 animate-spin text-primary" />
 
-              <span className="text-sm font-medium sm:text-base">Refesh …</span>
+                <span className="text-sm font-medium">Refresh …</span>
+              </div>
             </div>
-          </div>
-        )}
 
+            {/* Desktop / Tablet: nur über dem Vokabelbereich */}
+            <div className="absolute inset-0 z-50 hidden items-start justify-center bg-background/50 pt-24 backdrop-blur-[1px] md:flex">
+              <div className="flex items-center gap-3 rounded-lg border border-border bg-card/95 px-5 py-4 shadow-lg">
+                <LoaderCircle className="h-7 w-7 animate-spin text-primary" />
+
+                <span className="text-sm font-medium sm:text-base">Refresh …</span>
+              </div>
+            </div>
+          </>
+        )}
         {/* Vokabelkarten Druckansicht */}
         <div>
           <VokabelkartenGross vocs={vocs} />
