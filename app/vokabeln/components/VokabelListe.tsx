@@ -3,7 +3,7 @@
 import { useState } from "react";
 import type { Voc } from "../types";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { MessageSquareText, Languages, Pencil } from "lucide-react";
+import { MessageSquareText, Languages, Pencil, Trash2 } from "lucide-react";
 import VokabelEditor from "./VokabelEditor";
 
 type VokabelListeProps = {
@@ -15,13 +15,14 @@ type VokabelListeProps = {
   setEditVoc: React.Dispatch<React.SetStateAction<Voc | null>>;
 
   onEdit: (voc: Voc) => void;
+  onDelete: (voc: Voc) => void;
   onSave: () => void;
   onCancel: () => void;
 
   saving: boolean;
 };
 
-export default function VokabelListe({ vocs, editingId, editVoc, setEditVoc, onEdit, onSave, onCancel, saving }: VokabelListeProps) {
+export default function VokabelListe({ vocs, editingId, editVoc, setEditVoc, onEdit, onDelete, onSave, onCancel, saving }: VokabelListeProps) {
   const [openId, setOpenId] = useState<number | null>(null);
   const [exampleOpenId, setExampleOpenId] = useState<number | null>(null);
   const [translationOpenId, setTranslationOpenId] = useState<number | null>(null);
@@ -81,7 +82,13 @@ export default function VokabelListe({ vocs, editingId, editVoc, setEditVoc, onE
                   <Pencil className="h-4 w-4" />
                 </button>
               </div>
+              {/* Spalte 4: Delete */}
 
+              <div className="flex h-5 w-5 shrink-0 items-center justify-center">
+                <button type="button" title="Vokabel löschen" onClick={() => onDelete(voc)} className="text-muted-foreground transition hover:text-red-600">
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
               {/* Spalte 4: Wort */}
               <Popover open={openId === voc.id} onOpenChange={(open) => setOpenId(open ? voc.id : null)}>
                 <PopoverTrigger className="cursor-none text-left font-medium" onMouseEnter={() => setOpenId(voc.id)} onMouseLeave={() => setOpenId(null)}>

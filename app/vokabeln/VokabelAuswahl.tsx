@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { BookOpen, BookMarked, NotebookPen, Languages, Boxes, ScrollText, BookText, Save, LoaderCircle } from "lucide-react";
 import VokabelKarten from "./components/VokabelKarten";
 import VokabelListe from "./components/VokabelListe";
 import VokabelkartenGross from "./components/drucken/VokabelkartenGross";
 import VokabelkartenKlein from "./components/drucken/VokabelkartenKlein";
 import type { Voc } from "./types";
+import { useRouter } from "next/navigation";
 
 const shortcutIcons = {
   BookOpen,
@@ -92,6 +93,10 @@ export default function VokabelAuswahl({ initialLanguages, initialLanguage, init
   const [shortcuts, setShortcuts] = useState<Shortcut[]>([]);
 
   const [viewMode, setViewMode] = useState<"liste" | "karten">("liste");
+
+  const router = useRouter();
+
+  const urlSelectionHandledRef = useRef(false);
 
   async function fetchJson<T>(url: string): Promise<T> {
     const response = await fetch(url, {
@@ -288,6 +293,49 @@ export default function VokabelAuswahl({ initialLanguages, initialLanguage, init
     }
   }
 
+  useEffect(() => {
+    async function loadShortcuts() {
+      console.log("1. Shortcut-Fetch startet");
+
+      try {
+        console.log("2. Vor fetch");
+
+        const response = await fetch("/api/shortcuts");
+
+        console.log("3. Nach fetch:", response.status);
+
+        if (!response.ok) {
+          throw new Error("Shortcuts konnten nicht geladen werden.");
+        }
+
+        const data: Shortcut[] = await response.json();
+
+        console.log("4. Daten:", data);
+
+        setShortcuts(data);
+      } catch (error) {
+        console.error("5. Fehler beim Laden:", error);
+      }
+    }
+
+    loadShortcuts();
+  }, []);
+
+  const searchText = search.toLowerCase().trim();
+
+  const filteredVocs = vocs.filter((voc) => {
+    if (!searchText) {
+      return true;
+    }
+
+    return (
+      voc.wort?.toLowerCase().includes(searchText) ||
+      voc.uebersetzung?.toLowerCase().includes(searchText) ||
+      voc.beispielsatz?.toLowerCase().includes(searchText) ||
+      voc.beispielsatzuebersetzung?.toLowerCase().includes(searchText)
+    );
+  });
+
   function startEditing(voc: Voc) {
     setEditingId(voc.id);
     setEditVoc({ ...voc });
@@ -333,49 +381,44 @@ export default function VokabelAuswahl({ initialLanguages, initialLanguage, init
     }
   }
 
-  useEffect(() => {
-    async function loadShortcuts() {
-      console.log("1. Shortcut-Fetch startet");
+  async function deleteVoc(voc: Voc) {
+    const confirmed = window.confirm(`Soll der Datensatz „${voc.wort}“ wirklich gelöscht werden?`);
 
-      try {
-        console.log("2. Vor fetch");
+    if (!confirmed) {
+      return;
+    }
 
-        const response = await fetch("/api/shortcuts");
+    try {
+      setLoading(true);
+      setError("");
 
-        console.log("3. Nach fetch:", response.status);
+      const response = await fetch("/api/vokabeln/delete", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: voc.id,
+        }),
+      });
 
-        if (!response.ok) {
-          throw new Error("Shortcuts konnten nicht geladen werden.");
-        }
+      const data = await response.json();
 
-        const data: Shortcut[] = await response.json();
-
-        console.log("4. Daten:", data);
-
-        setShortcuts(data);
-      } catch (error) {
-        console.error("5. Fehler beim Laden:", error);
+      if (!response.ok) {
+        throw new Error(data.error ?? "Der Datensatz konnte nicht gelöscht werden.");
       }
+
+      setVocs((currentVocs) => currentVocs.filter((item) => item.id !== voc.id));
+
+      if (editingId === voc.id) {
+        cancelEditing();
+      }
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "Der Datensatz konnte nicht gelöscht werden.");
+    } finally {
+      setLoading(false);
     }
-
-    loadShortcuts();
-  }, []);
-
-  const searchText = search.toLowerCase().trim();
-
-  const filteredVocs = vocs.filter((voc) => {
-    if (!searchText) {
-      return true;
-    }
-
-    return (
-      voc.wort?.toLowerCase().includes(searchText) ||
-      voc.uebersetzung?.toLowerCase().includes(searchText) ||
-      voc.beispielsatz?.toLowerCase().includes(searchText) ||
-      voc.beispielsatzuebersetzung?.toLowerCase().includes(searchText)
-    );
-  });
-
+  }
   return (
     <section className="mx-auto w-full max-w-6xl px-3 py-4 sm:px-5 sm:py-5 lg:px-6 lg:py-6">
       <div className="rounded-xl border border-border bg-area-blue p-4 shadow-sm sm:p-5">
@@ -566,6 +609,14 @@ export default function VokabelAuswahl({ initialLanguages, initialLanguage, init
                   >
                     Karten
                   </button>
+
+                  <button
+                    type="button"
+                    onClick={() => router.push(`/vokabeln/neu?sprache=${encodeURIComponent(language)}&book=${encodeURIComponent(book)}&chapter=${encodeURIComponent(chapter)}`)}
+                    className="ml-auto rounded-lg border border-border bg-card px-4 py-2 text-sm font-medium transition hover:bg-muted"
+                  >
+                    Neuer Datensatz
+                  </button>
                 </div>
 
                 <div className="grid gap-3 sm:gap-4">
@@ -576,6 +627,7 @@ export default function VokabelAuswahl({ initialLanguages, initialLanguage, init
                       editVoc={editVoc}
                       setEditVoc={setEditVoc}
                       onEdit={startEditing}
+                      onDelete={deleteVoc}
                       onSave={() => void saveVoc()}
                       onCancel={cancelEditing}
                       saving={saving}
@@ -589,6 +641,7 @@ export default function VokabelAuswahl({ initialLanguages, initialLanguage, init
                       editVoc={editVoc}
                       setEditVoc={setEditVoc}
                       onEdit={startEditing}
+                      onDelete={deleteVoc}
                       onSave={() => void saveVoc()}
                       onCancel={cancelEditing}
                       saving={saving}

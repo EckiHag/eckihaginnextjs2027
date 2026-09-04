@@ -168,6 +168,17 @@ export default function VokabelEditor({ editVoc, setEditVoc, onSave, onCancel, l
         />
       </label>
 
+      {/* Buttons */}
+      <div className="flex flex-wrap gap-2">
+        <button type="button" className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90" onClick={onSave} disabled={loading}>
+          {loading ? "Speichert …" : "Speichern"}
+        </button>
+
+        <button type="button" className="rounded-lg border border-border px-4 py-2 text-sm font-medium hover:bg-muted" onClick={onCancel}>
+          Abbrechen
+        </button>
+      </div>
+
       <label className="block">
         <span className="mb-1 block text-sm font-medium">Beispielsatz</span>
         <textarea
@@ -197,6 +208,17 @@ export default function VokabelEditor({ editVoc, setEditVoc, onSave, onCancel, l
           className="w-full rounded-lg border border-border bg-background px-3 py-2"
         />
       </label>
+
+      {/* Buttons */}
+      <div className="flex flex-wrap gap-2">
+        <button type="button" className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90" onClick={onSave} disabled={loading}>
+          {loading ? "Speichert …" : "Speichern"}
+        </button>
+
+        <button type="button" className="rounded-lg border border-border px-4 py-2 text-sm font-medium hover:bg-muted" onClick={onCancel}>
+          Abbrechen
+        </button>
+      </div>
 
       <label className="block">
         <span className="mb-1 block text-sm font-medium">Eigener Kommentar</span>

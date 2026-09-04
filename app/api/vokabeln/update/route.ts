@@ -12,7 +12,24 @@ export async function POST(request: Request) {
 
     const body = await request.json();
 
-    const { id, artikel, wort, uebersetzung, beispielsatz, beispielsatzuebersetzung, eigenerKommentar } = body;
+    const {
+      id,
+      ord,
+      art,
+      artikel,
+      wort,
+      uebersetzung,
+      beispielsatz,
+      beispielsatzuebersetzung,
+      eigenerKommentar,
+      sprache,
+      book,
+      chapter,
+      schwierigkeitsgrad,
+      kapitel,
+      kapiteltext,
+      datum,
+    } = body;
 
     if (!id) {
       return NextResponse.json({ error: "Keine Vokabel-ID übergeben." }, { status: 400 });
@@ -22,13 +39,30 @@ export async function POST(request: Request) {
       where: {
         id: Number(id),
       },
+
       data: {
-        artikel,
-        wort,
-        uebersetzung,
-        beispielsatz,
-        beispielsatzuebersetzung,
-        eigenerKommentar,
+        ord: Number(ord ?? 0),
+
+        art: art ?? "",
+        artikel: artikel ?? "",
+        wort: wort ?? "",
+
+        uebersetzung: uebersetzung ?? "",
+        beispielsatz: beispielsatz ?? "",
+        beispielsatzuebersetzung: beispielsatzuebersetzung ?? "",
+        eigenerKommentar: eigenerKommentar ?? "",
+
+        sprache: sprache ?? "",
+        book: book ?? "",
+        chapter: chapter ?? "",
+
+        schwierigkeitsgrad: Number(schwierigkeitsgrad ?? 0),
+        kapitel: Number(kapitel ?? 0),
+        kapiteltext: kapiteltext ?? "",
+
+        ...(datum && {
+          datum: new Date(datum),
+        }),
       },
     });
 
@@ -38,6 +72,13 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("Fehler beim Speichern der Vokabel:", error);
 
-    return NextResponse.json({ error: "Die Vokabel konnte nicht gespeichert werden." }, { status: 500 });
+    return NextResponse.json(
+      {
+        error: "Die Vokabel konnte nicht gespeichert werden.",
+      },
+      {
+        status: 500,
+      },
+    );
   }
 }

@@ -1,6 +1,6 @@
 import type { Voc } from "../types";
 import VokabelEditor from "./VokabelEditor";
-
+import { Trash2 } from "lucide-react";
 type VokabelKartenProps = {
   vocs: Voc[];
   editingId: number | null;
@@ -9,13 +9,14 @@ type VokabelKartenProps = {
   setEditVoc: React.Dispatch<React.SetStateAction<Voc | null>>;
 
   onEdit: (voc: Voc) => void;
+  onDelete: (voc: Voc) => void;
   onSave: () => void;
   onCancel: () => void;
 
   saving: boolean;
 };
 
-export default function VokabelKarten({ vocs, editingId, editVoc, setEditVoc, onEdit, onSave, onCancel, saving }: VokabelKartenProps) {
+export default function VokabelKarten({ vocs, editingId, editVoc, setEditVoc, onEdit, onDelete, onSave, onCancel, saving }: VokabelKartenProps) {
   return (
     <div>
       {vocs.map((voc) => (
@@ -39,9 +40,20 @@ export default function VokabelKarten({ vocs, editingId, editVoc, setEditVoc, on
                   </h3>
                 </div>
 
-                <button type="button" className="shrink-0 rounded-lg border border-border px-3 py-2 text-sm font-medium transition hover:bg-muted" onClick={() => onEdit(voc)}>
-                  Bearbeiten
-                </button>
+                <div className="flex shrink-0 items-center gap-2">
+                  <button type="button" className="rounded-lg border border-border px-3 py-2 text-sm font-medium transition hover:bg-muted" onClick={() => onEdit(voc)}>
+                    Bearbeiten
+                  </button>
+
+                  <button
+                    type="button"
+                    title="Vokabel löschen"
+                    onClick={() => onDelete(voc)}
+                    className="rounded-lg border border-border p-2 text-muted-foreground transition hover:bg-red-50 hover:text-red-600"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
               </div>
             )}
           </div>
