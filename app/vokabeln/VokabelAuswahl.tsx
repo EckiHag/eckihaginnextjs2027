@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { BookOpen, BookMarked, NotebookPen, Languages, Boxes, ScrollText, BookText, Save, LoaderCircle } from "lucide-react";
 import VokabelKarten from "./components/VokabelKarten";
 import VokabelListe from "./components/VokabelListe";
+import VokabelUeben from "./components/VokabelUeben";
 import VokabelkartenGross from "./components/drucken/VokabelkartenGross";
 import VokabelkartenKlein from "./components/drucken/VokabelkartenKlein";
 import type { Voc } from "./types";
@@ -92,11 +93,9 @@ export default function VokabelAuswahl({ initialLanguages, initialLanguage, init
 
   const [shortcuts, setShortcuts] = useState<Shortcut[]>([]);
 
-  const [viewMode, setViewMode] = useState<"liste" | "karten">("liste");
+  const [viewMode, setViewMode] = useState<"liste" | "karten" | "ueben">("liste");
 
   const router = useRouter();
-
-  const urlSelectionHandledRef = useRef(false);
 
   async function fetchJson<T>(url: string): Promise<T> {
     const response = await fetch(url, {
@@ -612,6 +611,14 @@ export default function VokabelAuswahl({ initialLanguages, initialLanguage, init
 
                   <button
                     type="button"
+                    onClick={() => setViewMode("ueben")}
+                    className={`rounded-lg px-4 py-2 text-sm font-medium ${viewMode === "karten" ? "bg-primary text-primary-foreground" : "border border-border hover:bg-muted"}`}
+                  >
+                    Üben
+                  </button>
+
+                  <button
+                    type="button"
                     onClick={() => router.push(`/vokabeln/neu?sprache=${encodeURIComponent(language)}&book=${encodeURIComponent(book)}&chapter=${encodeURIComponent(chapter)}`)}
                     className="ml-auto rounded-lg border border-border bg-card px-4 py-2 text-sm font-medium transition hover:bg-muted"
                   >
@@ -636,6 +643,20 @@ export default function VokabelAuswahl({ initialLanguages, initialLanguage, init
 
                   {viewMode === "karten" && (
                     <VokabelKarten
+                      vocs={filteredVocs}
+                      editingId={editingId}
+                      editVoc={editVoc}
+                      setEditVoc={setEditVoc}
+                      onEdit={startEditing}
+                      onDelete={deleteVoc}
+                      onSave={() => void saveVoc()}
+                      onCancel={cancelEditing}
+                      saving={saving}
+                    />
+                  )}
+
+                  {viewMode === "ueben" && (
+                    <VokabelUeben
                       vocs={filteredVocs}
                       editingId={editingId}
                       editVoc={editVoc}

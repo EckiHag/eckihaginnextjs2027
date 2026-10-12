@@ -33,15 +33,15 @@ export default function VokabelkartenGross({ vocs }: VokabelkartenGrossProps) {
 
     const itemsPerPage = 8;
 
-    function getPosition(index: number) {
-      const column = index % 2;
-      const row = Math.floor(index / 2);
+    // function getPosition(index: number) {
+    //   const column = index % 2;
+    //   const row = Math.floor(index / 2);
 
-      return {
-        x: column * boxWidth,
-        y: row * boxHeight,
-      };
-    }
+    //   return {
+    //     x: column * boxWidth,
+    //     y: row * boxHeight,
+    //   };
+    // }
 
     function getBackPosition(index: number) {
       const column = index % 2;
@@ -81,29 +81,27 @@ export default function VokabelkartenGross({ vocs }: VokabelkartenGrossProps) {
 
         doc.setFont("helvetica", "normal");
         doc.setFontSize(12);
-
-        const wordLines = doc.splitTextToSize(hauptwort, boxWidth - 10);
+        const zeilenAufKarteVorne = 12;
+        const wordLines = doc.splitTextToSize(hauptwort, boxWidth - 10).slice(0, zeilenAufKarteVorne);
 
         doc.text(wordLines, x + 5, y + 16);
 
         const wordHeight = wordLines.length * 5;
 
         if (beispielsatz) {
-          doc.setFont("helvetica", "normal");
           doc.setFontSize(10);
 
-          const exampleLines = doc.splitTextToSize(beispielsatz, boxWidth - 10);
+          const exampleLines = doc.splitTextToSize(beispielsatz, boxWidth - 10).slice(0, zeilenAufKarteVorne);
 
           doc.text(exampleLines, x + 5, y + 18 + wordHeight);
         }
       });
 
       function drawGrid() {
-        for (let index = 0; index < 8; index++) {
-          const { x, y } = getPosition(index);
-
-          doc.rect(x, y, boxWidth, boxHeight);
-        }
+        // for (let index = 0; index < 8; index++) {
+        //   const { x, y } = getPosition(index);
+        //   doc.rect(x, y, boxWidth, boxHeight);
+        // }
       }
 
       /*
@@ -135,7 +133,8 @@ export default function VokabelkartenGross({ vocs }: VokabelkartenGrossProps) {
         doc.setFont("helvetica", "normal");
         doc.setFontSize(12);
 
-        const translationLines = doc.splitTextToSize(uebersetzung, boxWidth - 10);
+        const zeilenAufKarteHinten = 12;
+        const translationLines = doc.splitTextToSize(uebersetzung, boxWidth - 10).slice(0, zeilenAufKarteHinten);
 
         doc.text(translationLines, x + 5, y + 16);
 
@@ -144,7 +143,7 @@ export default function VokabelkartenGross({ vocs }: VokabelkartenGrossProps) {
         if (beispielsatzuebersetzung) {
           doc.setFontSize(10);
 
-          const exampleTranslationLines = doc.splitTextToSize(beispielsatzuebersetzung, boxWidth - 10);
+          const exampleTranslationLines = doc.splitTextToSize(beispielsatzuebersetzung, boxWidth - 10).slice(0, zeilenAufKarteHinten);
 
           doc.text(exampleTranslationLines, x + 5, y + 18 + translationHeight);
         }

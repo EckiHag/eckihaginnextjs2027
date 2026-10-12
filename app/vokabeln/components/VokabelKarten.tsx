@@ -16,6 +16,12 @@ type VokabelKartenProps = {
   saving: boolean;
 };
 
+// return (
+//   <div>
+//     {[...vocs]
+//       .sort((a, b) => Number(a.id) - Number(b.id))
+//       .map((voc) => (
+
 export default function VokabelKarten({ vocs, editingId, editVoc, setEditVoc, onEdit, onDelete, onSave, onCancel, saving }: VokabelKartenProps) {
   return (
     <div>
@@ -28,19 +34,30 @@ export default function VokabelKarten({ vocs, editingId, editVoc, setEditVoc, on
             ) : (
               <div className="flex min-w-0 items-start justify-between gap-4">
                 <div className="min-w-0">
-                  <h3 className="wrap-break-words text-lg font-bold sm:text-xl">
-                    {voc.artikel ? `${voc.artikel} ` : ""}
+                  <div className="group relative inline-block">
+                    <h3 className="wrap-break-words cursor-help text-lg font-bold sm:text-xl">
+                      {voc.artikel ? `${voc.artikel} ` : ""}
+                      <span
+                        dangerouslySetInnerHTML={{
+                          __html: voc.wort,
+                        }}
+                      />
+                    </h3>
 
                     <div
-                      className="wrap-break-word text-sm leading-relaxed text-muted-foreground sm:text-base [&_a]:font-medium [&_a]:text-primary [&_a]:underline [&_a]:underline-offset-2 hover:[&_a]:opacity-80"
-                      dangerouslySetInnerHTML={{
-                        __html: voc.wort,
-                      }}
-                    />
-                  </h3>
+                      role="tooltip"
+                      className="pointer-events-none absolute bottom-full left-0 z-50 mb-2
+               hidden w-max max-w-xs rounded-md border bg-popover
+               px-3 py-2 text-sm font-normal text-popover-foreground
+               shadow-md group-hover:block"
+                    >
+                      {voc.uebersetzung}
+                    </div>
+                  </div>
                 </div>
 
                 <div className="flex shrink-0 items-center gap-2">
+                  {`${voc.ord} / ${voc.id}`}
                   <button type="button" className="rounded-lg border border-border px-3 py-2 text-sm font-medium transition hover:bg-muted" onClick={() => onEdit(voc)}>
                     Bearbeiten
                   </button>
