@@ -2,16 +2,20 @@
 
 import { useState } from "react";
 import type { Voc } from "../types";
+import { Eye, RotateCw, ArrowRight, Pencil } from "lucide-react";
 
 type VokabelUebenProps = {
   vocs: Voc[];
+  onEdit: (voc: Voc) => void;
 };
 
-export default function VokabelUeben({ vocs }: VokabelUebenProps) {
+export default function VokabelUeben({ vocs, onEdit }: VokabelUebenProps) {
   const [karten, setKarten] = useState<Voc[]>([]);
   const [index, setIndex] = useState(0);
   const [umgedreht, setUmgedreht] = useState(false);
   const [gestartet, setGestartet] = useState(false);
+  const [hoverVorschau, setHoverVorschau] = useState(false);
+  const rueckseiteSichtbar = umgedreht || hoverVorschau;
 
   function starten() {
     // Kopie erstellen, damit die ursprünglichen vocs unverändert bleiben.
@@ -30,31 +34,22 @@ export default function VokabelUeben({ vocs }: VokabelUebenProps) {
     setIndex(0);
     setUmgedreht(false);
     setGestartet(true);
+    setHoverVorschau(false);
   }
 
   function weiter() {
+    if (!rueckseiteSichtbar) {
+      // Zunächst die Übersetzung anzeigen.
+      setUmgedreht(true);
+      setHoverVorschau(false);
+      return;
+    }
+
+    // Übersetzung ist bereits sichtbar: nächste Vokabel.
     setIndex((vorher) => vorher + 1);
     setUmgedreht(false);
+    setHoverVorschau(false);
   }
-
-  if (vocs.length === 0) {
-    return <p className="p-6 text-center text-slate-500">Keine Vokabeln zum Üben vorhanden.</p>;
-  }
-
-  if (!gestartet) {
-    return (
-      <div className="mx-auto max-w-xl space-y-5 p-6 text-center">
-        <h2 className="text-2xl font-bold">Vokabeln üben</h2>
-
-        <p className="text-slate-600">{vocs.length} Vokabeln stehen bereit. Überlege dir die Übersetzung und drehe dann die Karte um.</p>
-
-        <button type="button" onClick={starten} className="rounded-xl bg-blue-600 px-6 py-3 font-semibold text-white hover:bg-blue-700">
-          Üben starten
-        </button>
-      </div>
-    );
-  }
-
   const voc = karten[index];
 
   if (!voc) {
@@ -74,7 +69,7 @@ export default function VokabelUeben({ vocs }: VokabelUebenProps) {
   const wort = [voc.artikel, voc.wort].filter(Boolean).join(" ");
 
   return (
-    <div className="mx-auto max-w-xl space-y-5 p-4">
+    <div className="mx-auto w-full max-w-xl space-y-5 p-4">
       <div className="flex items-center justify-between text-sm text-slate-600">
         <span>
           Karte {index + 1} von {karten.length}
@@ -85,7 +80,7 @@ export default function VokabelUeben({ vocs }: VokabelUebenProps) {
         </button>
       </div>
 
-      <button
+      {/* <button
         type="button"
         onClick={() => setUmgedreht((vorher) => !vorher)}
         aria-label={umgedreht ? "Wort anzeigen" : "Übersetzung anzeigen"}
@@ -94,21 +89,80 @@ export default function VokabelUeben({ vocs }: VokabelUebenProps) {
     transition-colors focus-visible:outline-2
     focus-visible:outline-offset-4 focus-visible:outline-blue-600
     ${umgedreht ? "border-green-300 bg-green-50" : "border-blue-200 bg-white hover:bg-blue-50"}`}
+      > */}
+      <div
+        className={`flex h-80 w-full flex-col overflow-hidden
+    rounded-2xl border-2 p-4 shadow-md transition-colors
+    ${rueckseiteSichtbar ? "border-green-300 bg-green-50" : "border-blue-200 bg-white"}`}
       >
-        <span className="shrink-0 text-sm font-medium uppercase tracking-wide text-slate-500">{umgedreht ? "Übersetzung" : "Vokabel"}</span>
+        {/* Symbolbuttons oben rechts */}
+        <div className="flex shrink-0 justify-end gap-2">
+          <button
+            type="button"
+            title="Karte umdrehen"
+            aria-label="Karte umdrehen"
+            aria-pressed={umgedreht}
+            onClick={() => setUmgedreht((vorher) => !vorher)}
+            className="rounded-lg border border-slate-300 bg-white
+        p-2 text-slate-600 hover:bg-blue-100
+        focus-visible:outline-2 focus-visible:outline-blue-600"
+          >
+            <RotateCw className="h-4 w-4" />
+          </button>
 
-        <span className="my-4 flex min-h-0 w-full flex-1 flex-col overflow-y-auto">
-          <span className="my-auto flex w-full shrink-0 flex-col gap-5">
-            <span className="wrap-break-word text-3xl font-bold text-slate-900">{umgedreht ? voc.uebersetzung : wort}</span>
+          <button
+            type="button"
+            title="Vokabel bearbeiten"
+            aria-label="Vokabel bearbeiten"
+            onClick={() => onEdit(voc)}
+            className="rounded-lg border border-slate-300 bg-white
+        p-2 text-slate-600 hover:bg-amber-100
+        focus-visible:outline-2 focus-visible:outline-blue-600"
+          >
+            <Pencil className="h-4 w-4" />
+          </button>
 
-            <span className="wrap-break-wordtext-base leading-relaxed text-slate-600">{umgedreht ? voc.beispielsatzuebersetzung : voc.beispielsatz}</span>
-          </span>
-        </span>
+          <button
+            type="button"
+            title={!rueckseiteSichtbar ? "Übersetzung anzeigen" : index === karten.length - 1 ? "Durchgang abschließen" : "Nächste Vokabel"}
+            aria-label={!rueckseiteSichtbar ? "Übersetzung anzeigen" : index === karten.length - 1 ? "Durchgang abschließen" : "Nächste Vokabel"}
+            onClick={weiter}
+            className="rounded-lg bg-blue-600 p-2 text-white
+        hover:bg-blue-700 focus-visible:outline-2
+        focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+          >
+            <ArrowRight className="h-4 w-4" />
+          </button>
+          <button
+            type="button"
+            title="Übersetzung beim Darüberfahren anzeigen"
+            aria-label="Übersetzung vorübergehend anzeigen"
+            onMouseEnter={() => setHoverVorschau(true)}
+            onMouseLeave={() => setHoverVorschau(false)}
+            onFocus={() => setHoverVorschau(true)}
+            onBlur={() => setHoverVorschau(false)}
+            className="rounded-lg border border-slate-300 bg-white
+        p-2 text-slate-600 hover:bg-blue-100
+        focus-visible:outline-2 focus-visible:outline-blue-600"
+          >
+            <Eye className="h-4 w-4" />
+          </button>
+        </div>
 
-        <span className="shrink-0 text-sm text-slate-500">Zum Umdrehen klicken</span>
-      </button>
+        {/* Karteninhalt */}
+        <div className="mt-3 shrink-0 text-center text-xs font-medium uppercase tracking-wide text-slate-500">{rueckseiteSichtbar ? "Übersetzung" : "Vokabel"}</div>
 
-      <div className="flex gap-3">
+        <div className="mt-4 min-h-0 flex-1 overflow-y-auto text-center">
+          <div className="flex min-h-full flex-col items-center justify-center gap-5 px-2 pb-2">
+            <div className="w-full break-words text-3xl font-bold text-slate-900">{rueckseiteSichtbar ? voc.uebersetzung : wort}</div>
+
+            <div className="w-full break-words text-sm leading-relaxed text-slate-600">{rueckseiteSichtbar ? voc.beispielsatzuebersetzung : voc.beispielsatz}</div>
+          </div>
+        </div>
+      </div>
+      {/* </button> */}
+
+      {/* <div className="flex gap-3">
         <button
           type="button"
           onMouseEnter={() => setUmgedreht(true)}
@@ -124,7 +178,7 @@ export default function VokabelUeben({ vocs }: VokabelUebenProps) {
         <button type="button" onClick={weiter} className="rounded-xl bg-blue-600 px-6 py-3 font-semibold text-white hover:bg-blue-700">
           {index === karten.length - 1 ? "Abschließen" : "Weiter →"}
         </button>
-      </div>
+      </div> */}
     </div>
   );
 }

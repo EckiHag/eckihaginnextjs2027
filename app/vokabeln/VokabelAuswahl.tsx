@@ -658,14 +658,10 @@ export default function VokabelAuswahl({ initialLanguages, initialLanguage, init
                   {viewMode === "ueben" && (
                     <VokabelUeben
                       vocs={filteredVocs}
-                      // editingId={editingId}
-                      // editVoc={editVoc}
-                      // setEditVoc={setEditVoc}
-                      // onEdit={startEditing}
-                      // onDelete={deleteVoc}
-                      // onSave={() => void saveVoc()}
-                      // onCancel={cancelEditing}
-                      // saving={saving}
+                      onEdit={(voc) => {
+                        startEditing(voc);
+                        setViewMode("karten");
+                      }}
                     />
                   )}
                 </div>
