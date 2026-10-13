@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { Voc } from "../types";
-import { Eye, RotateCw, ArrowRight, Pencil } from "lucide-react";
+import { Eye, RotateCw, ArrowRight, ArrowLeft, Pencil } from "lucide-react";
 
 type VokabelUebenProps = {
   vocs: Voc[];
@@ -68,8 +68,17 @@ export default function VokabelUeben({ vocs, onEdit }: VokabelUebenProps) {
 
   const wort = [voc.artikel, voc.wort].filter(Boolean).join(" ");
 
+  function zurueck() {
+    if (karten.length === 0) return;
+
+    setIndex((vorher) => (vorher === 0 ? karten.length - 1 : vorher - 1));
+
+    setUmgedreht(false);
+    setHoverVorschau(false);
+  }
+
   return (
-    <div className="mx-auto w-full max-w-xl space-y-5 p-4">
+    <div className="ml-auto mr-0 w-full max-w-xl space-y-5 p-4 lg:mx-auto">
       <div className="flex items-center justify-between text-sm text-slate-600">
         <span>
           Karte {index + 1} von {karten.length}
@@ -91,12 +100,13 @@ export default function VokabelUeben({ vocs, onEdit }: VokabelUebenProps) {
     ${umgedreht ? "border-green-300 bg-green-50" : "border-blue-200 bg-white hover:bg-blue-50"}`}
       > */}
       <div
-        className={`flex h-80 w-full flex-col overflow-hidden
-    rounded-2xl border-2 p-4 shadow-md transition-colors
-    ${rueckseiteSichtbar ? "border-green-300 bg-green-50" : "border-blue-200 bg-white"}`}
+        className={`relative flex h-80 w-full flex-none flex-col
+  overflow-hidden rounded-2xl border-2 py-4 pl-4 pr-16
+  shadow-md transition-colors
+  ${rueckseiteSichtbar ? "border-green-300 bg-green-50" : "border-blue-200 bg-white"}`}
       >
         {/* Symbolbuttons oben rechts */}
-        <div className="flex shrink-0 justify-end gap-2">
+        <div className="absolute right-4 top-4 flex flex-col items-center gap-2">
           <button
             type="button"
             title="Karte umdrehen"
@@ -135,6 +145,17 @@ export default function VokabelUeben({ vocs, onEdit }: VokabelUebenProps) {
           </button>
           <button
             type="button"
+            title="Vorherige Vokabel"
+            aria-label="Vorherige Vokabel"
+            onClick={zurueck}
+            className="rounded-lg bg-blue-600 p-2 text-white
+    hover:bg-blue-700 focus-visible:outline-2
+    focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </button>
+          <button
+            type="button"
             title="Übersetzung beim Darüberfahren anzeigen"
             aria-label="Übersetzung vorübergehend anzeigen"
             onMouseEnter={() => setHoverVorschau(true)}
@@ -153,8 +174,8 @@ export default function VokabelUeben({ vocs, onEdit }: VokabelUebenProps) {
         <div className="mt-3 shrink-0 text-center text-xs font-medium uppercase tracking-wide text-slate-500">{rueckseiteSichtbar ? "Übersetzung" : "Vokabel"}</div>
 
         <div className="mt-4 min-h-0 flex-1 overflow-y-auto text-center">
-          <div className="flex min-h-full flex-col items-center justify-center gap-5 px-2 pb-2">
-            <div className="w-full break-words text-3xl font-bold text-slate-900">{rueckseiteSichtbar ? voc.uebersetzung : wort}</div>
+          <div className="flex min-h-full flex-col items-center justify-start  gap-5 px-2 pb-2">
+            <div className="w-full whitespace-pre-line break-words text-2xl font-bold text-slate-900">{rueckseiteSichtbar ? voc.uebersetzung : wort}</div>
 
             <div className="w-full break-words text-sm leading-relaxed text-slate-600">{rueckseiteSichtbar ? voc.beispielsatzuebersetzung : voc.beispielsatz}</div>
           </div>
