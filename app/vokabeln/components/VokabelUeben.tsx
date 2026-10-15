@@ -78,7 +78,7 @@ export default function VokabelUeben({ vocs, onEdit }: VokabelUebenProps) {
   }
 
   return (
-    <div className="ml-auto mr-0 w-full max-w-xl space-y-5 p-4 lg:mx-auto">
+    <div className="vokabel-uebung w-full max-w-xl space-y-5 p-4">
       <div className="flex items-center justify-between text-sm text-slate-600">
         <span>
           Karte {index + 1} von {karten.length}
@@ -181,25 +181,6 @@ export default function VokabelUeben({ vocs, onEdit }: VokabelUebenProps) {
           </div>
         </div>
       </div>
-      {/* </button> */}
-
-      {/* <div className="flex gap-3">
-        <button
-          type="button"
-          onMouseEnter={() => setUmgedreht(true)}
-          onMouseLeave={() => setUmgedreht(false)}
-          onFocus={() => setUmgedreht(true)}
-          onBlur={() => setUmgedreht(false)}
-          className="w-1/2 flex-none rounded-xl border border-slate-300
-    px-3 py-2 text-sm font-semibold hover:bg-slate-100"
-        >
-          {umgedreht ? "Wort anzeigen" : "Übersetzung anzeigen"}
-        </button>
-
-        <button type="button" onClick={weiter} className="rounded-xl bg-blue-600 px-6 py-3 font-semibold text-white hover:bg-blue-700">
-          {index === karten.length - 1 ? "Abschließen" : "Weiter →"}
-        </button>
-      </div> */}
     </div>
   );
 }

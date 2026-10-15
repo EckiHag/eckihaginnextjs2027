@@ -373,3 +373,15 @@
     cursor: pointer;
   }
 }
+
+.vokabel-uebung {
+  margin-left: auto;
+  margin-right: 0;
+}
+
+@media (min-width: 1024px) and (hover: hover) and (pointer: fine) {
+  .vokabel-uebung {
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
