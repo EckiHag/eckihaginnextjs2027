@@ -1,6 +1,6 @@
 import type { Voc } from "../types";
 import VokabelEditor from "./VokabelEditor";
-import { Trash2 } from "lucide-react";
+import { Trash2, Languages } from "lucide-react";
 type VokabelKartenProps = {
   vocs: Voc[];
   editingId: number | null;
@@ -70,6 +70,40 @@ export default function VokabelKarten({ vocs, editingId, editVoc, setEditVoc, on
                   >
                     <Trash2 className="h-4 w-4" />
                   </button>
+                  <a
+                    href={`https://es-de.dict.cc/?s=${encodeURIComponent(voc.wort.trim())}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title="Wort bei dict.cc nachschlagen"
+                    className="rounded-lg border border-border px-3 py-2
+    text-sm font-medium transition hover:bg-muted"
+                  >
+                    dict.cc
+                  </a>
+
+                  <a
+                    href={`https://dict.leo.org/spanisch-deutsch/${encodeURIComponent(voc.wort.trim())}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title="Wort bei LEO nachschlagen"
+                    className="rounded-lg border border-border px-3 py-2
+    text-sm font-medium transition hover:bg-muted"
+                  >
+                    LEO
+                  </a>
+                  {voc.beispielsatz?.trim() && (
+                    <a
+                      href={`https://translate.google.com/?sl=auto&tl=de&text=${encodeURIComponent(voc.beispielsatz.trim())}&op=translate`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      title="Beispielsatz ins Deutsche übersetzen"
+                      aria-label="Beispielsatz mit Google Übersetzer ins Deutsche übersetzen"
+                      className="rounded-lg border border-border p-2
+      text-muted-foreground transition hover:bg-muted"
+                    >
+                      <Languages className="h-4 w-4" />
+                    </a>
+                  )}
                 </div>
               </div>
             )}
@@ -84,7 +118,7 @@ export default function VokabelKarten({ vocs, editingId, editVoc, setEditVoc, on
               {/* Beispielsatz */}
               {voc.beispielsatz && (
                 <div
-                  className="wrap-break-word text-sm leading-relaxed text-muted-foreground sm:text-base [&_a]:font-medium [&_a]:text-primary [&_a]:underline [&_a]:underline-offset-2 hover:[&_a]:opacity-80"
+                  className="whitespace-pre-line wrap-break-word text-sm leading-relaxed text-muted-foreground sm:text-base [&_a]:font-medium [&_a]:text-primary [&_a]:underline [&_a]:underline-offset-2 hover:[&_a]:opacity-80"
                   dangerouslySetInnerHTML={{
                     __html: voc.beispielsatz,
                   }}
@@ -97,7 +131,7 @@ export default function VokabelKarten({ vocs, editingId, editVoc, setEditVoc, on
               {/* Beispielsatz-Übersetzung */}
               {voc.beispielsatzuebersetzung && (
                 <div
-                  className="wrap-break-word text-sm leading-relaxed text-muted-foreground sm:text-base [&_a]:font-medium [&_a]:text-primary [&_a]:underline [&_a]:underline-offset-2 hover:[&_a]:opacity-80"
+                  className="whitespace-pre-line wrap-break-word text-sm leading-relaxed text-muted-foreground sm:text-base [&_a]:font-medium [&_a]:text-primary [&_a]:underline [&_a]:underline-offset-2 hover:[&_a]:opacity-80"
                   dangerouslySetInnerHTML={{
                     __html: voc.beispielsatzuebersetzung,
                   }}

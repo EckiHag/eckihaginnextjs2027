@@ -612,7 +612,7 @@ export default function VokabelAuswahl({ initialLanguages, initialLanguage, init
                   <button
                     type="button"
                     onClick={() => setViewMode("ueben")}
-                    className={`rounded-lg px-4 py-2 text-sm font-medium ${viewMode === "karten" ? "bg-primary text-primary-foreground" : "border border-border hover:bg-muted"}`}
+                    className={`rounded-lg px-4 py-2 text-sm font-medium ${viewMode === "ueben" ? "bg-primary text-primary-foreground" : "border border-border hover:bg-muted"}`}
                   >
                     Üben
                   </button>
@@ -660,7 +660,7 @@ export default function VokabelAuswahl({ initialLanguages, initialLanguage, init
                       vocs={filteredVocs}
                       onEdit={(voc) => {
                         startEditing(voc);
-                        setViewMode("karten");
+                        setViewMode("ueben");
                       }}
                     />
                   )}

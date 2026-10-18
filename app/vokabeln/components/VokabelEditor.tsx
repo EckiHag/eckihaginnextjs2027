@@ -139,32 +139,32 @@ export default function VokabelEditor({ editVoc, setEditVoc, onSave, onCancel, l
 
         <label>
           <span className="mb-1 block text-sm font-medium">Wort</span>
-          <input
-            type="text"
-            value={editVoc.wort}
+          <textarea
+            rows={3}
+            value={editVoc.wort ?? ""}
             onChange={(event) =>
               setEditVoc({
                 ...editVoc,
                 wort: event.target.value,
               })
             }
-            className="w-full rounded-lg border border-border bg-background px-3 py-2"
+            className="w-full resize-y rounded-lg border border-border bg-background px-3 py-2"
           />
         </label>
       </div>
 
       <label className="block">
         <span className="mb-1 block text-sm font-medium">Übersetzung</span>
-        <input
-          type="text"
-          value={editVoc.uebersetzung}
+        <textarea
+          rows={3}
+          value={editVoc.uebersetzung ?? ""}
           onChange={(event) =>
             setEditVoc({
               ...editVoc,
               uebersetzung: event.target.value,
             })
           }
-          className="w-full rounded-lg border border-border bg-background px-3 py-2"
+          className="w-full resize-y rounded-lg border border-border bg-background px-3 py-2"
         />
       </label>
 

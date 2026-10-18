@@ -46,7 +46,7 @@ export default function VokabelListe({ vocs, editingId, editVoc, setEditVoc, onE
 
                     <PopoverContent className="w-auto max-w-sm" onMouseEnter={() => setExampleOpenId(voc.id)} onMouseLeave={() => setExampleOpenId(null)}>
                       <div
-                        className="text-sm leading-relaxed"
+                        className="whitespace-pre-line text-sm leading-relaxed"
                         dangerouslySetInnerHTML={{
                           __html: voc.beispielsatz,
                         }}
@@ -66,7 +66,7 @@ export default function VokabelListe({ vocs, editingId, editVoc, setEditVoc, onE
 
                     <PopoverContent className="w-auto max-w-sm" onMouseEnter={() => setTranslationOpenId(voc.id)} onMouseLeave={() => setTranslationOpenId(null)}>
                       <div
-                        className="text-sm leading-relaxed"
+                        className="whitespace-pre-line text-sm leading-relaxed"
                         dangerouslySetInnerHTML={{
                           __html: voc.beispielsatzuebersetzung,
                         }}
@@ -104,7 +104,7 @@ export default function VokabelListe({ vocs, editingId, editVoc, setEditVoc, onE
 
                 <PopoverContent className="w-auto max-w-xs" onMouseEnter={() => setOpenId(voc.id)} onMouseLeave={() => setOpenId(null)}>
                   <div
-                    className="text-sm"
+                    className="whitespace-pre-line text-sm"
                     dangerouslySetInnerHTML={{
                       __html: voc.uebersetzung,
                     }}

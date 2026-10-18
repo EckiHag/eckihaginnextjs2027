@@ -10,6 +10,12 @@ export default function Home() {
       <p>Wählen Sie einen Bereich aus:</p>
 
       <div className={styles.grid}>
+        <Link href="/vokabeln" className={styles.card}>
+          <Image src="/images/termine.jpg" alt="Termine" width={500} height={300} className={styles.image} />
+
+          <h2>Vokabeln</h2>
+        </Link>
+
         <a href="https://places26.vercel.app/" target="_blank" rel="noopener noreferrer" className={styles.card}>
           <Image src="/images/places26.jpg" alt="Daten" width={500} height={300} className={styles.image} />
 
@@ -29,12 +35,6 @@ export default function Home() {
 
           <h2>datenbanktest</h2>
           <p>datenbanktest anzeigen</p>
-        </Link>
-
-        <Link href="/vokabeln" className={styles.card}>
-          <Image src="/images/termine.jpg" alt="Termine" width={500} height={300} className={styles.image} />
-
-          <h2>Vokabeln</h2>
         </Link>
 
         <Link href="/login" className={styles.card}>

@@ -175,9 +175,11 @@ export default function VokabelUeben({ vocs, onEdit }: VokabelUebenProps) {
 
         <div className="mt-4 min-h-0 flex-1 overflow-y-auto text-center">
           <div className="flex min-h-full flex-col items-center justify-start  gap-5 px-2 pb-2">
-            <div className="w-full whitespace-pre-line break-words text-2xl font-bold text-slate-900">{rueckseiteSichtbar ? voc.uebersetzung : wort}</div>
+            <div className="w-full whitespace-pre-line wrap-break-word text-2xl font-bold text-slate-900">{rueckseiteSichtbar ? voc.uebersetzung : wort}</div>
 
-            <div className="w-full break-words text-sm leading-relaxed text-slate-600">{rueckseiteSichtbar ? voc.beispielsatzuebersetzung : voc.beispielsatz}</div>
+            <div className="w-full whitespace-pre-line wrap-break-word text-sm leading-relaxed text-slate-600">
+              {rueckseiteSichtbar ? voc.beispielsatzuebersetzung : voc.beispielsatz}
+            </div>
           </div>
         </div>
       </div>
