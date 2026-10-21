@@ -81,6 +81,8 @@ export default function VokabelAuswahl({ initialLanguages, initialLanguage, init
   const [chapters, setChapters] = useState<ChapterOption[]>(initialChapters);
   const [chapter, setChapter] = useState(initialChapter);
 
+  const [chapterPrefix, setChapterPrefix] = useState("");
+
   const [vocs, setVocs] = useState<Voc[]>(initialVocs);
   const [search, setSearch] = useState("");
 
@@ -197,6 +199,7 @@ export default function VokabelAuswahl({ initialLanguages, initialLanguage, init
       setLoading(true);
       setError("");
 
+      setChapterPrefix("");
       setChapter(newChapter);
 
       // ENTFERNEN:
@@ -418,6 +421,33 @@ export default function VokabelAuswahl({ initialLanguages, initialLanguage, init
       setLoading(false);
     }
   }
+
+  async function handleChapterGroup() {
+    const prefix = chapterPrefix.trim();
+
+    if (!prefix) {
+      setError("Bitte einen Kapitelanfang eingeben.");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError("");
+
+      const url = `/api/vokabeln?action=chapterGroup` + `&sprache=${encodeURIComponent(language)}` + `&book=${encodeURIComponent(book)}` + `&prefix=${encodeURIComponent(prefix)}`;
+
+      const data = await fetchJson<ChapterResponse>(url);
+
+      setVocs(data.vocs);
+
+      // Damit nicht weiterhin ein einzelnes Kapitel angezeigt wird
+      setChapter("");
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "Die Kapitelgruppe konnte nicht geladen werden.");
+    } finally {
+      setLoading(false);
+    }
+  }
   return (
     <section className="mx-auto w-full max-w-6xl px-3 py-4 sm:px-5 sm:py-5 lg:px-6 lg:py-6">
       <div className="rounded-xl border border-border bg-area-blue p-4 shadow-sm sm:p-5">
@@ -515,6 +545,30 @@ export default function VokabelAuswahl({ initialLanguages, initialLanguage, init
           </div>
         </div>
 
+        {/* Kapitelgruppe */}
+        <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-end">
+          <label className="block">
+            <span className="mb-1.5 block text-sm font-semibold sm:text-base">Kapitelgruppe</span>
+
+            <input
+              type="text"
+              value={chapterPrefix}
+              onChange={(event) => setChapterPrefix(event.target.value)}
+              placeholder="z. B. 01"
+              className="w-32 rounded-lg border border-border bg-background px-3 py-2.5 text-base text-foreground outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/30"
+            />
+          </label>
+
+          <button
+            type="button"
+            onClick={() => void handleChapterGroup()}
+            disabled={loading || !book || !chapterPrefix.trim()}
+            className="rounded-lg border border-border bg-card px-4 py-2.5 text-base font-medium transition hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            Gruppe laden
+          </button>
+        </div>
+
         {/* Suche */}
         <div className="mb-6">
           <label className="block">
@@ -570,7 +624,7 @@ export default function VokabelAuswahl({ initialLanguages, initialLanguage, init
             <div className="my-10 mb-5 sm:mb-6">
               <h2 className="wrap-break-words text-xl font-bold sm:text-2xl">
                 {book}
-                {chapter ? ` – ${chapter}` : ""}
+                {chapter ? ` – ${chapter}` : chapterPrefix ? ` – Kapitelgruppe ${chapterPrefix}*` : ""}
               </h2>
 
               <p className="mt-1 text-sm text-muted-foreground sm:text-base">

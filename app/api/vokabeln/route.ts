@@ -259,6 +259,36 @@ export async function GET(request: NextRequest) {
       });
     }
 
+    if (action === "chapterGroup") {
+      const sprache = searchParams.get("sprache") ?? "";
+      const book = searchParams.get("book") ?? "";
+      const prefix = searchParams.get("prefix") ?? "";
+
+      if (!sprache || !book || !prefix) {
+        return Response.json({ error: "Sprache, Buch und Kapitelgruppe sind erforderlich." }, { status: 400 });
+      }
+
+      const vocs = await prisma.vocs.findMany({
+        where: {
+          sprache,
+          book,
+          chapter: {
+            startsWith: prefix,
+          },
+        },
+        orderBy: [
+          {
+            wort: "asc",
+          },
+          {
+            id: "asc",
+          },
+        ],
+      });
+
+      return Response.json({ vocs });
+    }
+
     return NextResponse.json({ error: "Unbekannte Aktion." }, { status: 400 });
   } catch (error) {
     console.error("Fehler in /api/vokabeln:", error);
