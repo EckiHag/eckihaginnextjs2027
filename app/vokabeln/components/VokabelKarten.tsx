@@ -27,13 +27,13 @@ export default function VokabelKarten({ vocs, editingId, editVoc, setEditVoc, on
     <div>
       {vocs.map((voc) => (
         <article key={voc.id} className="min-w-0 rounded-xl border border-border bg-card p-4 shadow-sm sm:p-5">
-          {/* Kopf */}
+          {/* Kopf wort */}
           <div className="mb-3 min-w-0 sm:mb-4">
             {editingId === voc.id && editVoc ? (
               <VokabelEditor editVoc={editVoc} setEditVoc={setEditVoc} onSave={onSave} onCancel={onCancel} loading={saving} />
             ) : (
-              <div className="flex min-w-0 items-start justify-between gap-4">
-                <div className="min-w-0">
+              <div className="flex min-w-0 flex-col gap-3 sm:flex-row-reverse sm:items-start sm:justify-between sm:gap-4">
+                <div className="w-full min-w-0 text-right sm:w-auto sm:flex-1">
                   <div className="group relative inline-block">
                     <h3 className="wrap-break-words cursor-help text-lg font-bold sm:text-xl">
                       {voc.artikel ? `${voc.artikel} ` : ""}
@@ -46,7 +46,7 @@ export default function VokabelKarten({ vocs, editingId, editVoc, setEditVoc, on
 
                     <div
                       role="tooltip"
-                      className="pointer-events-none absolute bottom-full left-0 z-50 mb-2
+                      className="pointer-events-none absolute whitespace-pre-line bottom-full right-0 z-50 mb-2
                hidden w-max max-w-xs rounded-md border bg-popover
                px-3 py-2 text-sm font-normal text-popover-foreground
                shadow-md group-hover:block"
@@ -55,8 +55,8 @@ export default function VokabelKarten({ vocs, editingId, editVoc, setEditVoc, on
                     </div>
                   </div>
                 </div>
-
-                <div className="flex shrink-0 items-center gap-2">
+                {/* Kopf buttons */}
+                <div className="flex w-full min-w-0 flex-wrap items-center justify-start gap-2 sm:w-auto sm:shrink-0">
                   {`${voc.ord} / ${voc.id}`}
                   <button type="button" className="rounded-lg border border-border px-3 py-2 text-sm font-medium transition hover:bg-muted" onClick={() => onEdit(voc)}>
                     Bearbeiten
@@ -96,12 +96,13 @@ export default function VokabelKarten({ vocs, editingId, editVoc, setEditVoc, on
                       href={`https://translate.google.com/?sl=auto&tl=de&text=${encodeURIComponent(voc.beispielsatz.trim())}&op=translate`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      title="Beispielsatz ins Deutsche übersetzen"
+                      title="Beispielsatz ins Deutsche übersetzen Google Übersetzer"
                       aria-label="Beispielsatz mit Google Übersetzer ins Deutsche übersetzen"
                       className="rounded-lg border border-border p-2
       text-muted-foreground transition hover:bg-muted"
                     >
-                      <Languages className="h-4 w-4" />
+                      GoogÜb
+                      {/* <Languages className="h-4 w-4" /> */}
                     </a>
                   )}
                 </div>
