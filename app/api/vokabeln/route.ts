@@ -289,6 +289,34 @@ export async function GET(request: NextRequest) {
       return Response.json({ vocs });
     }
 
+    if (action === "letterGroup") {
+      const prefix = searchParams.get("prefix") ?? "";
+
+      if (!sprache || !book || !prefix) {
+        return NextResponse.json({ error: "Sprache, Buch und Buchstabe sind erforderlich." }, { status: 400 });
+      }
+
+      const vocs = await prisma.vocs.findMany({
+        where: {
+          sprache,
+          book,
+          wort: {
+            startsWith: prefix,
+          },
+        },
+        orderBy: [
+          {
+            wort: "asc",
+          },
+          {
+            id: "asc",
+          },
+        ],
+      });
+
+      return NextResponse.json({ vocs });
+    }
+
     return NextResponse.json({ error: "Unbekannte Aktion." }, { status: 400 });
   } catch (error) {
     console.error("Fehler in /api/vokabeln:", error);

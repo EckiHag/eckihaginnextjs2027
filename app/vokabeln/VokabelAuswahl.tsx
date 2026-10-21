@@ -426,7 +426,7 @@ export default function VokabelAuswahl({ initialLanguages, initialLanguage, init
     const prefix = chapterPrefix.trim();
 
     if (!prefix) {
-      setError("Bitte einen Kapitelanfang eingeben.");
+      setError("Bitte einen Kapitelanfang oder Buchstaben eingeben.");
       return;
     }
 
@@ -434,20 +434,24 @@ export default function VokabelAuswahl({ initialLanguages, initialLanguage, init
       setLoading(true);
       setError("");
 
-      const url = `/api/vokabeln?action=chapterGroup` + `&sprache=${encodeURIComponent(language)}` + `&book=${encodeURIComponent(book)}` + `&prefix=${encodeURIComponent(prefix)}`;
+      // Genau ein Buchstabe?
+      const isLetter = /^\p{L}$/u.test(prefix);
+
+      const action = isLetter ? "letterGroup" : "chapterGroup";
+
+      const url = `/api/vokabeln?action=${action}` + `&sprache=${encodeURIComponent(language)}` + `&book=${encodeURIComponent(book)}` + `&prefix=${encodeURIComponent(prefix)}`;
 
       const data = await fetchJson<ChapterResponse>(url);
 
       setVocs(data.vocs);
-
-      // Damit nicht weiterhin ein einzelnes Kapitel angezeigt wird
       setChapter("");
     } catch (error) {
-      setError(error instanceof Error ? error.message : "Die Kapitelgruppe konnte nicht geladen werden.");
+      setError(error instanceof Error ? error.message : "Die Auswahl konnte nicht geladen werden.");
     } finally {
       setLoading(false);
     }
   }
+
   return (
     <section className="mx-auto w-full max-w-6xl px-3 py-4 sm:px-5 sm:py-5 lg:px-6 lg:py-6">
       <div className="rounded-xl border border-border bg-area-blue p-4 shadow-sm sm:p-5">
@@ -545,7 +549,7 @@ export default function VokabelAuswahl({ initialLanguages, initialLanguage, init
           </div>
         </div>
 
-        {/* Kapitelgruppe */}
+        {/* Kapitelgruppe / Anfangsbuchstabe */}
         <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-end">
           <label className="block">
             <span className="mb-1.5 block text-sm font-semibold sm:text-base">Kapitelgruppe</span>
@@ -554,7 +558,7 @@ export default function VokabelAuswahl({ initialLanguages, initialLanguage, init
               type="text"
               value={chapterPrefix}
               onChange={(event) => setChapterPrefix(event.target.value)}
-              placeholder="z. B. 01"
+              placeholder="z. B. 01 oder a"
               className="w-32 rounded-lg border border-border bg-background px-3 py-2.5 text-base text-foreground outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/30"
             />
           </label>
