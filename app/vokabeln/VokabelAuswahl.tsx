@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { BookOpen, BookMarked, NotebookPen, Languages, Boxes, ScrollText, BookText, Save, LoaderCircle } from "lucide-react";
+import { BookOpen, BookMarked, NotebookPen, Languages, Boxes, ScrollText, BookText, Save, LoaderCircle, ArrowRightLeft } from "lucide-react";
 import VokabelKarten from "./components/VokabelKarten";
 import VokabelListe from "./components/VokabelListe";
 import VokabelUeben from "./components/VokabelUeben";
@@ -96,6 +96,8 @@ export default function VokabelAuswahl({ initialLanguages, initialLanguage, init
   const [shortcuts, setShortcuts] = useState<Shortcut[]>([]);
 
   const [viewMode, setViewMode] = useState<"liste" | "karten" | "ueben">("liste");
+
+  const [reversed, setReversed] = useState(false);
 
   const router = useRouter();
 
@@ -426,7 +428,7 @@ export default function VokabelAuswahl({ initialLanguages, initialLanguage, init
     const prefix = chapterPrefix.trim();
 
     if (!prefix) {
-      setError("Bitte einen Kapitelanfang oder Buchstaben eingeben.");
+      setError("Bitte Kapitelgruppe, Buchstaben oder Suchtext eingeben.");
       return;
     }
 
@@ -434,10 +436,16 @@ export default function VokabelAuswahl({ initialLanguages, initialLanguage, init
       setLoading(true);
       setError("");
 
-      // Genau ein Buchstabe?
-      const isLetter = /^\p{L}$/u.test(prefix);
+      let action: string;
 
-      const action = isLetter ? "letterGroup" : "chapterGroup";
+      // 01 oder 1 Buchstabe oder Suche ab 3 Buchstaben
+      if (/^\p{L}$/u.test(prefix)) {
+        action = "letterGroup";
+      } else if (prefix.length >= 3) {
+        action = "wordSearch";
+      } else {
+        action = "chapterGroup";
+      }
 
       const url = `/api/vokabeln?action=${action}` + `&sprache=${encodeURIComponent(language)}` + `&book=${encodeURIComponent(book)}` + `&prefix=${encodeURIComponent(prefix)}`;
 
@@ -549,16 +557,15 @@ export default function VokabelAuswahl({ initialLanguages, initialLanguage, init
           </div>
         </div>
 
-        {/* Kapitelgruppe / Anfangsbuchstabe */}
+        {/* Gruppe / Wortsuche */}
         <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-end">
           <label className="block">
-            <span className="mb-1.5 block text-sm font-semibold sm:text-base">Kapitelgruppe</span>
-
+            <span className="mb-1.5 block text-sm font-semibold sm:text-base">Gruppe / Wortsuche</span>
             <input
               type="text"
               value={chapterPrefix}
               onChange={(event) => setChapterPrefix(event.target.value)}
-              placeholder="z. B. 01 oder a"
+              placeholder="z. B. 01, A oder ..."
               className="w-32 rounded-lg border border-border bg-background px-3 py-2.5 text-base text-foreground outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/30"
             />
           </label>
@@ -571,21 +578,6 @@ export default function VokabelAuswahl({ initialLanguages, initialLanguage, init
           >
             Gruppe laden
           </button>
-        </div>
-
-        {/* Suche */}
-        <div className="mb-6">
-          <label className="block">
-            <span className="mb-1.5 block text-sm font-semibold sm:text-base">Suche</span>
-
-            <input
-              type="text"
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-              placeholder="Wort, Übersetzung oder Beispielsatz suchen ..."
-              className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-base text-foreground outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/30"
-            />
-          </label>
         </div>
 
         {/* Fehler */}
@@ -674,7 +666,17 @@ export default function VokabelAuswahl({ initialLanguages, initialLanguage, init
                   >
                     Üben
                   </button>
-
+                  <button
+                    type="button"
+                    onClick={() => setReversed((current) => !current)}
+                    title={reversed ? "Deutsch → Fremdsprache" : "Fremdsprache → Deutsch"}
+                    className={`rounded-lg px-4 py-2 text-sm font-medium transition ${reversed ? "bg-primary text-primary-foreground" : "border border-border hover:bg-muted"}`}
+                  >
+                    <span className="flex items-center gap-2">
+                      <ArrowRightLeft className="h-4 w-4" />
+                      Drehen
+                    </span>
+                  </button>
                   <button
                     type="button"
                     onClick={() => router.push(`/vokabeln/neu?sprache=${encodeURIComponent(language)}&book=${encodeURIComponent(book)}&chapter=${encodeURIComponent(chapter)}`)}
@@ -688,6 +690,7 @@ export default function VokabelAuswahl({ initialLanguages, initialLanguage, init
                   {viewMode === "liste" && (
                     <VokabelListe
                       vocs={filteredVocs}
+                      reversed={reversed}
                       editingId={editingId}
                       editVoc={editVoc}
                       setEditVoc={setEditVoc}
@@ -702,6 +705,7 @@ export default function VokabelAuswahl({ initialLanguages, initialLanguage, init
                   {viewMode === "karten" && (
                     <VokabelKarten
                       vocs={filteredVocs}
+                      reversed={reversed}
                       editingId={editingId}
                       editVoc={editVoc}
                       setEditVoc={setEditVoc}
@@ -716,6 +720,7 @@ export default function VokabelAuswahl({ initialLanguages, initialLanguage, init
                   {viewMode === "ueben" && (
                     <VokabelUeben
                       vocs={filteredVocs}
+                      reversed={reversed}
                       onEdit={(voc) => {
                         startEditing(voc);
                         setViewMode("ueben");

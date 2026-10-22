@@ -62,11 +62,10 @@ export async function GET(request: NextRequest) {
         },
         select: {
           chapter: true,
-          kapitel: true,
         },
-        distinct: ["chapter", "kapitel"],
+        distinct: ["chapter"],
         orderBy: {
-          kapitel: "asc",
+          chapter: "asc",
         },
       });
 
@@ -121,11 +120,10 @@ export async function GET(request: NextRequest) {
         },
         select: {
           chapter: true,
-          kapitel: true,
         },
-        distinct: ["chapter", "kapitel"],
+        distinct: ["chapter"],
         orderBy: {
-          kapitel: "asc",
+          chapter: "asc",
         },
       });
 
@@ -228,11 +226,10 @@ export async function GET(request: NextRequest) {
         },
         select: {
           chapter: true,
-          kapitel: true,
         },
-        distinct: ["chapter", "kapitel"],
+        distinct: ["chapter"],
         orderBy: {
-          kapitel: "asc",
+          chapter: "asc",
         },
       });
 
@@ -302,6 +299,34 @@ export async function GET(request: NextRequest) {
           book,
           wort: {
             startsWith: prefix,
+          },
+        },
+        orderBy: [
+          {
+            wort: "asc",
+          },
+          {
+            id: "asc",
+          },
+        ],
+      });
+
+      return NextResponse.json({ vocs });
+    }
+
+    if (action === "wordSearch") {
+      const prefix = searchParams.get("prefix") ?? "";
+
+      if (!sprache || !book || prefix.length < 3) {
+        return NextResponse.json({ error: "Für die Wortsuche sind mindestens drei Buchstaben erforderlich." }, { status: 400 });
+      }
+
+      const vocs = await prisma.vocs.findMany({
+        where: {
+          sprache,
+          book,
+          wort: {
+            contains: prefix,
           },
         },
         orderBy: [

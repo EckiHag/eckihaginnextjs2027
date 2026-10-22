@@ -6,10 +6,11 @@ import { Eye, RotateCw, ArrowRight, ArrowLeft, Pencil } from "lucide-react";
 
 type VokabelUebenProps = {
   vocs: Voc[];
+  reversed: boolean;
   onEdit: (voc: Voc) => void;
 };
 
-export default function VokabelUeben({ vocs, onEdit }: VokabelUebenProps) {
+export default function VokabelUeben({ vocs, reversed, onEdit }: VokabelUebenProps) {
   const [karten, setKarten] = useState<Voc[]>([]);
   const [index, setIndex] = useState(0);
   const [umgedreht, setUmgedreht] = useState(false);
@@ -66,7 +67,14 @@ export default function VokabelUeben({ vocs, onEdit }: VokabelUebenProps) {
     );
   }
 
-  const wort = [voc.artikel, voc.wort].filter(Boolean).join(" ");
+  const fremdwort = [voc.artikel, voc.wort].filter(Boolean).join(" ");
+
+  const frontWord = reversed ? voc.uebersetzung : fremdwort;
+  const backWord = reversed ? fremdwort : voc.uebersetzung;
+
+  const frontSentence = reversed ? voc.beispielsatzuebersetzung : voc.beispielsatz;
+
+  const backSentence = reversed ? voc.beispielsatz : voc.beispielsatzuebersetzung;
 
   function zurueck() {
     if (karten.length === 0) return;
@@ -76,7 +84,6 @@ export default function VokabelUeben({ vocs, onEdit }: VokabelUebenProps) {
     setUmgedreht(false);
     setHoverVorschau(false);
   }
-
   return (
     <div className="vokabel-uebung w-full max-w-xl space-y-5 p-4">
       <div className="flex items-center justify-between text-sm text-slate-600">
@@ -89,16 +96,6 @@ export default function VokabelUeben({ vocs, onEdit }: VokabelUebenProps) {
         </button>
       </div>
 
-      {/* <button
-        type="button"
-        onClick={() => setUmgedreht((vorher) => !vorher)}
-        aria-label={umgedreht ? "Wort anzeigen" : "Übersetzung anzeigen"}
-        className={`flex h-80 w-full flex-col overflow-hidden
-    rounded-2xl border-2 p-6 text-center shadow-md
-    transition-colors focus-visible:outline-2
-    focus-visible:outline-offset-4 focus-visible:outline-blue-600
-    ${umgedreht ? "border-green-300 bg-green-50" : "border-blue-200 bg-white hover:bg-blue-50"}`}
-      > */}
       <div
         className={`relative flex h-80 w-full flex-none flex-col
   overflow-hidden rounded-2xl border-2 py-4 pl-4 pr-16
@@ -171,15 +168,15 @@ export default function VokabelUeben({ vocs, onEdit }: VokabelUebenProps) {
         </div>
 
         {/* Karteninhalt */}
-        <div className="mt-3 shrink-0 text-center text-xs font-medium uppercase tracking-wide text-slate-500">{rueckseiteSichtbar ? "Übersetzung" : "Vokabel"}</div>
+        <div className="mt-3 shrink-0 text-center text-xs font-medium uppercase tracking-wide text-slate-500">
+          {rueckseiteSichtbar ? (reversed ? "Fremdsprache" : "Deutsch") : reversed ? "Deutsch" : "Fremdsprache"}
+        </div>
 
         <div className="mt-4 min-h-0 flex-1 overflow-y-auto text-center">
-          <div className="flex min-h-full flex-col items-center justify-start  gap-5 px-2 pb-2">
-            <div className="w-full whitespace-pre-line wrap-break-word text-2xl font-bold text-slate-900">{rueckseiteSichtbar ? voc.uebersetzung : wort}</div>
+          <div className="flex min-h-full flex-col items-center justify-start gap-5 px-2 pb-2">
+            <div className="w-full whitespace-pre-line wrap-break-word text-2xl font-bold text-slate-900">{rueckseiteSichtbar ? backWord : frontWord}</div>
 
-            <div className="w-full whitespace-pre-line wrap-break-word text-sm leading-relaxed text-slate-600">
-              {rueckseiteSichtbar ? voc.beispielsatzuebersetzung : voc.beispielsatz}
-            </div>
+            <div className="w-full whitespace-pre-line wrap-break-word text-sm leading-relaxed text-slate-600">{rueckseiteSichtbar ? backSentence : frontSentence}</div>
           </div>
         </div>
       </div>
