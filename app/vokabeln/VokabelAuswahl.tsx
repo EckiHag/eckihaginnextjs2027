@@ -561,6 +561,7 @@ export default function VokabelAuswahl({ initialLanguages, initialLanguage, init
         <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-end">
           <label className="block">
             <span className="mb-1.5 block text-sm font-semibold sm:text-base">Gruppe / Wortsuche</span>
+
             <input
               type="text"
               value={chapterPrefix}
@@ -578,8 +579,13 @@ export default function VokabelAuswahl({ initialLanguages, initialLanguage, init
           >
             Gruppe laden
           </button>
-        </div>
 
+          {/* Druckbuttons rechts */}
+          <div className="flex gap-2 sm:ml-auto">
+            <VokabelkartenGross vocs={vocs} />
+            <VokabelkartenKlein vocs={vocs} />
+          </div>
+        </div>
         {/* Fehler */}
         {error && <div className="mb-4 rounded-lg border border-red-600 bg-red-50 p-4 text-sm text-red-800 sm:text-base">{error}</div>}
       </div>
@@ -608,11 +614,6 @@ export default function VokabelAuswahl({ initialLanguages, initialLanguage, init
             </div>
           </>
         )}
-        {/* Vokabelkarten Druckansicht */}
-        <div>
-          <VokabelkartenGross vocs={vocs} />
-          <VokabelkartenKlein vocs={vocs} />
-        </div>
 
         {!error && (
           <>
@@ -642,7 +643,7 @@ export default function VokabelAuswahl({ initialLanguages, initialLanguage, init
               </div>
             ) : (
               <div>
-                <div className="mb-4 flex gap-2">
+                <div className="mb-4 flex flex-wrap items-center gap-2">
                   <button
                     type="button"
                     onClick={() => setViewMode("liste")}
@@ -666,6 +667,7 @@ export default function VokabelAuswahl({ initialLanguages, initialLanguage, init
                   >
                     Üben
                   </button>
+
                   <button
                     type="button"
                     onClick={() => setReversed((current) => !current)}
@@ -677,10 +679,11 @@ export default function VokabelAuswahl({ initialLanguages, initialLanguage, init
                       Drehen
                     </span>
                   </button>
+
                   <button
                     type="button"
                     onClick={() => router.push(`/vokabeln/neu?sprache=${encodeURIComponent(language)}&book=${encodeURIComponent(book)}&chapter=${encodeURIComponent(chapter)}`)}
-                    className="ml-auto rounded-lg border border-border bg-card px-4 py-2 text-sm font-medium transition hover:bg-muted"
+                    className="rounded-lg border border-border bg-card px-4 py-2 text-sm font-medium transition hover:bg-muted sm:ml-auto"
                   >
                     Neuer Datensatz
                   </button>
