@@ -385,3 +385,96 @@
     margin-right: auto;
   }
 }
+/*
+ * =========================================================
+ * HTML-DATENKARTEN
+ * Für strukturierte Inhalte aus Vokabel-Datensätzen
+ * =========================================================
+ */
+
+.dataCards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  width: 100%;
+  max-width: 100%;
+  margin: 1rem 0 2rem;
+}
+
+.dataCard {
+  min-width: 0;
+  max-width: 100%;
+  padding: 1rem;
+
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+
+  background: var(--card);
+  color: var(--card-foreground);
+
+  overflow-wrap: anywhere;
+}
+
+.dataCard h2 {
+  margin: 0 0 0.75rem;
+  padding-bottom: 0.4rem;
+
+  border-bottom: 1px solid var(--border);
+
+  font-size: 1.05rem;
+  font-weight: 700;
+  line-height: 1.3;
+
+  overflow-wrap: anywhere;
+}
+
+.dataCard dl {
+  display: grid;
+  grid-template-columns: minmax(5.5rem, auto) minmax(0, 1fr);
+  gap: 0.35rem 0.75rem;
+
+  margin: 0;
+}
+
+.dataCard dt {
+  min-width: 0;
+
+  font-weight: 600;
+  color: var(--muted-foreground);
+
+  overflow-wrap: anywhere;
+}
+
+.dataCard dd {
+  min-width: 0;
+  margin: 0;
+
+  color: var(--card-foreground);
+
+  overflow-wrap: anywhere;
+}
+
+/*
+ * Smartphone / schmale Bildschirme:
+ * nur noch eine Datenkarte pro Zeile
+ */
+@media (max-width: 700px) {
+  .dataCards {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .dataCard {
+    padding: 0.75rem;
+  }
+
+  .dataCard dl {
+    grid-template-columns: minmax(5rem, auto) minmax(0, 1fr);
+    gap: 0.3rem 0.6rem;
+  }
+}
+
+.liAnker {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}

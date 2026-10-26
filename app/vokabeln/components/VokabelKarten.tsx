@@ -41,14 +41,15 @@ export default function VokabelKarten({ vocs, reversed, editingId, editVoc, setE
               {editingId === voc.id && editVoc ? (
                 <VokabelEditor editVoc={editVoc} setEditVoc={setEditVoc} onSave={onSave} onCancel={onCancel} loading={saving} />
               ) : (
-                <div className="flex min-w-0 flex-col gap-3 sm:flex-row-reverse sm:items-start sm:justify-between sm:gap-4">
-                  {/* Wort */}
-                  <div className="w-full min-w-0 text-right sm:w-auto sm:flex-1">
-                    <div className="group relative inline-block">
-                      <h3 className="wrap-break-words cursor-help text-lg font-bold sm:text-xl">
+                <div className="flex min-w-0 max-w-full flex-col gap-3 lg:flex-row-reverse lg:items-start lg:gap-4">
+                  {/* Wort / Titel */}
+                  <div className="min-w-0 max-w-full text-right lg:flex-1">
+                    <div className="group relative block max-w-full">
+                      <h3 className="max-w-full wrap-break-word text-lg font-bold leading-snug sm:text-xl">
                         {!reversed && voc.artikel ? `${voc.artikel} ` : ""}
 
                         <span
+                          className="wrap-break-word"
                           dangerouslySetInnerHTML={{
                             __html: frontWord ?? "",
                           }}
@@ -58,7 +59,7 @@ export default function VokabelKarten({ vocs, reversed, editingId, editVoc, setE
                       {/* Tooltip mit Übersetzung */}
                       <div
                         role="tooltip"
-                        className="pointer-events-none absolute bottom-full right-0 z-50 mb-2 hidden w-max max-w-xs whitespace-pre-line rounded-md border bg-popover px-3 py-2 text-sm font-normal text-popover-foreground shadow-md group-hover:block"
+                        className="pointer-events-none absolute bottom-full right-0 z-50 mb-2 hidden max-w-xs whitespace-pre-line rounded-md border bg-popover px-3 py-2 text-sm font-normal text-popover-foreground shadow-md group-hover:block"
                       >
                         {reversed && voc.artikel ? `${voc.artikel} ${backWord}` : backWord}
                       </div>
@@ -66,7 +67,7 @@ export default function VokabelKarten({ vocs, reversed, editingId, editVoc, setE
                   </div>
 
                   {/* Kopf Buttons */}
-                  <div className="flex w-full min-w-0 flex-wrap items-center justify-start gap-2 sm:w-auto sm:shrink-0">
+                  <div className="flex min-w-0 max-w-full flex-wrap items-center justify-start gap-2 lg:shrink-0">
                     {`${voc.ord} / ${voc.id}`}
 
                     <button type="button" className="rounded-lg border border-border px-3 py-2 text-sm font-medium transition hover:bg-muted" onClick={() => onEdit(voc)}>
@@ -100,6 +101,16 @@ export default function VokabelKarten({ vocs, reversed, editingId, editVoc, setE
                       className="rounded-lg border border-border px-3 py-2 text-sm font-medium transition hover:bg-muted"
                     >
                       LEO
+                    </a>
+
+                    <a
+                      href={`https://de.pons.com/%C3%BCbersetzung/spanisch-deutsch/${encodeURIComponent(voc.wort.trim())}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      title="Wort bei PONS nachschlagen"
+                      className="rounded-lg border border-border px-3 py-2 text-sm font-medium transition hover:bg-muted"
+                    >
+                      Pons
                     </a>
 
                     {voc.beispielsatz?.trim() && (
