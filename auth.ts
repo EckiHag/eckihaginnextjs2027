@@ -54,11 +54,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
+        token.sessionVersion = user.sessionVersion;
       }
 
       const userId = Number(token.id);
 
-      if (!Number.isSafeInteger(userId) || userId <= 0) {
+      if (!Number.isSafeInteger(userId) || userId <= 0 || typeof token.sessionVersion !== "number") {
         return null;
       }
 
@@ -71,10 +72,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           name: true,
           role: true,
           active: true,
+          sessionVersion: true,
         },
       });
 
-      if (!currentUser || !currentUser.active) {
+      if (!currentUser || !currentUser.active || token.sessionVersion !== currentUser.sessionVersion) {
         return null;
       }
 
@@ -141,6 +143,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           id: String(user.id),
           name: user.name,
           role: user.role,
+          sessionVersion: user.sessionVersion,
         };
       },
     }),

@@ -78,7 +78,12 @@ export async function resetPassword(_previousState: ResetState, formData: FormDa
 
         await tx.userEckiHack.update({
           where: { id: record.userId },
-          data: { passwordHash },
+          data: {
+            passwordHash,
+            sessionVersion: {
+              increment: 1,
+            },
+          },
         });
 
         // Auch andere offene Links dieses Kontos ungültig machen.
