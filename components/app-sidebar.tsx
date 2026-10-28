@@ -75,6 +75,7 @@ const administrationNavigation = [
 
 export function AppSidebar({ userRole }: AppSidebarProps) {
   const pathname = usePathname();
+  const canUseProtectedAreas = userRole === "USER" || userRole === "EDITOR" || userRole === "ADMIN";
   const { isMobile, setOpenMobile } = useSidebar();
   const touchStartX = useRef<number | null>(null);
   // const vocabularyIsActive = pathname.startsWith("/vokabeln");
@@ -145,7 +146,7 @@ export function AppSidebar({ userRole }: AppSidebarProps) {
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
-          {userRole === "ADMIN" && (
+          {canUseProtectedAreas && (
             <SidebarGroup>
               <SidebarGroupLabel>Datenbank haggipapi</SidebarGroupLabel>
 

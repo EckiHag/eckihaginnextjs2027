@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-
+import { UserRole } from "@/app/generated/prisma/client";
 export async function POST(request: Request) {
   try {
     /*
@@ -19,6 +19,12 @@ export async function POST(request: Request) {
           status: 401,
         },
       );
+    }
+
+    const allowedRoles: UserRole[] = [UserRole.USER, UserRole.EDITOR, UserRole.ADMIN];
+
+    if (!allowedRoles.includes(session.user.role)) {
+      return NextResponse.json({ error: "Dein Konto ist noch nicht freigeschaltet." }, { status: 403 });
     }
 
     const userId = Number(session.user.id);

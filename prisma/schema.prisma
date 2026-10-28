@@ -183,8 +183,9 @@ model UserEckiHack {
   sprache_save      String   @default("") @db.VarChar(20)
   book_save          String   @default("") @db.VarChar(99)
   chapter_save       String   @default("") @db.VarChar(99)
-
+passwordResetTokens PasswordResetToken[]
   @@map("userseckihack")
+  sessionVersion Int @default(0)
 }
 
 model Shortcut {
@@ -203,4 +204,18 @@ model Shortcut {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  tokenHash String    @unique @db.Char(64)
+  userId    Int
+  createdAt DateTime  @default(now())
+  expiresAt DateTime
+  usedAt    DateTime?
+
+  user UserEckiHack @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
 }

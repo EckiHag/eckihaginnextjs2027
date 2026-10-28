@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
-
+import { UserRole } from "@/app/generated/prisma/client";
 export async function POST(request: Request) {
   try {
     const session = await auth();
@@ -10,6 +10,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Nicht angemeldet." }, { status: 401 });
     }
 
+    const allowedRoles: UserRole[] = [UserRole.USER, UserRole.EDITOR, UserRole.ADMIN];
+
+    if (!allowedRoles.includes(session.user.role)) {
+      return NextResponse.json({ error: "Dein Konto ist noch nicht freigeschaltet." }, { status: 403 });
+    }
     const body = await request.json();
 
     const {
