@@ -2,6 +2,7 @@ import { AuthError } from "next-auth";
 import { redirect } from "next/navigation";
 
 import { signIn } from "@/auth";
+import Link from "next/link";
 
 export default function LoginPage() {
   async function login(formData: FormData) {
@@ -52,6 +53,12 @@ export default function LoginPage() {
           borderRadius: "0.75rem",
         }}
       >
+        <p className="mt-6 text-center text-sm">
+          Du hast noch kein Konto?{" "}
+          <Link href="/register" className="font-medium underline">
+            Jetzt registrieren
+          </Link>
+        </p>
         <div>
           <h1>Anmelden</h1>
           <p>Bitte melde dich mit deinem Benutzernamen an.</p>

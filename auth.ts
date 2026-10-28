@@ -16,15 +16,36 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
   callbacks: {
     authorized({ auth, request }) {
-      const isLoggedIn = Boolean(auth?.user);
       const pathname = request.nextUrl.pathname;
 
-      const protectedRoutes = ["/vokabeln", "/datenbanktest", "/daten", "/designtestpage"];
+      const protectedRoutes = ["/vokabeln", "/datenbanktest", "/daten", "/designtestpage", "/api/vokabeln"];
 
-      const isProtectedRoute = protectedRoutes.some((route) => pathname.startsWith(route));
+      const isProtectedRoute = protectedRoutes.some((route) => pathname === route || pathname.startsWith(`${route}/`));
 
-      if (isProtectedRoute) {
-        return isLoggedIn;
+      if (!isProtectedRoute) {
+        return true;
+      }
+
+      const isApiRoute = pathname.startsWith("/api/");
+
+      if (!auth?.user) {
+        if (isApiRoute) {
+          return Response.json({ error: "Bitte melde dich an." }, { status: 401 });
+        }
+
+        return false;
+      }
+
+      const allowedRoles: UserRole[] = [UserRole.USER, UserRole.EDITOR, UserRole.ADMIN];
+
+      const isApproved = allowedRoles.includes(auth.user.role);
+
+      if (!isApproved) {
+        if (isApiRoute) {
+          return Response.json({ error: "Dein Konto ist noch nicht freigeschaltet." }, { status: 403 });
+        }
+
+        return Response.redirect(new URL("/freischaltung", request.nextUrl));
       }
 
       return true;
@@ -45,7 +66,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
        */
       if (session.user) {
         session.user.id = String(token.id ?? "");
-        session.user.role = (token.role as UserRole) ?? UserRole.USER;
+        session.user.role = (token.role as UserRole) ?? UserRole.NEWBIE;
       }
 
       return session;

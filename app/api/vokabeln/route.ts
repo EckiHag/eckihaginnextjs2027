@@ -1,8 +1,37 @@
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@/auth";
+import { UserRole } from "@/app/generated/prisma/client";
 
 export async function GET(request: NextRequest) {
   try {
+    const session = await auth();
+
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Bitte melde dich an." }, { status: 401 });
+    }
+
+    const userId = Number(session.user.id);
+
+    if (!Number.isSafeInteger(userId) || userId <= 0) {
+      return NextResponse.json({ error: "Die Anmeldung ist ungültig." }, { status: 401 });
+    }
+
+    const user = await prisma.userEckiHack.findUnique({
+      where: {
+        id: userId,
+      },
+      select: {
+        active: true,
+        role: true,
+      },
+    });
+
+    const allowedRoles: UserRole[] = [UserRole.USER, UserRole.EDITOR, UserRole.ADMIN];
+
+    if (!user || !user.active || !allowedRoles.includes(user.role)) {
+      return NextResponse.json({ error: "Du hast keinen Zugang zu diesen Daten." }, { status: 403 });
+    }
     const searchParams = request.nextUrl.searchParams;
 
     const action = searchParams.get("action");
