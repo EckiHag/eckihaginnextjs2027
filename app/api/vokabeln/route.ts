@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { UserRole } from "@/app/generated/prisma/client";
+import { visibleLanguageFilter } from "@/lib/backend-access";
 
 export async function GET(request: NextRequest) {
   try {
@@ -32,6 +33,7 @@ export async function GET(request: NextRequest) {
     if (!user || !user.active || !allowedRoles.includes(user.role)) {
       return NextResponse.json({ error: "Du hast keinen Zugang zu diesen Daten." }, { status: 403 });
     }
+    const languageAccess = visibleLanguageFilter(user.role);
     const searchParams = request.nextUrl.searchParams;
 
     const action = searchParams.get("action");
@@ -54,6 +56,7 @@ export async function GET(request: NextRequest) {
 
       const bookRows = await prisma.vocs.findMany({
         where: {
+          AND: [languageAccess],
           sprache,
           book: {
             not: "",
@@ -83,6 +86,7 @@ export async function GET(request: NextRequest) {
 
       const chapters = await prisma.vocs.findMany({
         where: {
+          AND: [languageAccess],
           sprache,
           book: firstBook,
           chapter: {
@@ -103,6 +107,7 @@ export async function GET(request: NextRequest) {
       const vocs = firstChapter
         ? await prisma.vocs.findMany({
             where: {
+              AND: [languageAccess],
               sprache,
               book: firstBook,
               chapter: firstChapter,
@@ -141,6 +146,7 @@ export async function GET(request: NextRequest) {
 
       const chapters = await prisma.vocs.findMany({
         where: {
+          AND: [languageAccess],
           sprache,
           book,
           chapter: {
@@ -161,6 +167,7 @@ export async function GET(request: NextRequest) {
       const vocs = firstChapter
         ? await prisma.vocs.findMany({
             where: {
+              AND: [languageAccess],
               sprache,
               book,
               chapter: firstChapter,
@@ -195,6 +202,7 @@ export async function GET(request: NextRequest) {
 
       const vocs = await prisma.vocs.findMany({
         where: {
+          AND: [languageAccess],
           sprache,
           book,
           chapter,
@@ -229,6 +237,7 @@ export async function GET(request: NextRequest) {
 
       const bookRows = await prisma.vocs.findMany({
         where: {
+          AND: [languageAccess],
           sprache,
           book: {
             not: "",
@@ -247,6 +256,7 @@ export async function GET(request: NextRequest) {
 
       const chapters = await prisma.vocs.findMany({
         where: {
+          AND: [languageAccess],
           sprache,
           book,
           chapter: {
@@ -264,6 +274,7 @@ export async function GET(request: NextRequest) {
 
       const vocs = await prisma.vocs.findMany({
         where: {
+          AND: [languageAccess],
           sprache,
           book,
           chapter,
@@ -324,6 +335,7 @@ export async function GET(request: NextRequest) {
 
       const vocs = await prisma.vocs.findMany({
         where: {
+          AND: [languageAccess],
           sprache,
           book,
           wort: {
@@ -352,6 +364,7 @@ export async function GET(request: NextRequest) {
 
       const vocs = await prisma.vocs.findMany({
         where: {
+          AND: [languageAccess],
           sprache,
           book,
           wort: {

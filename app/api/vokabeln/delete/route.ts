@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 import { UserRole } from "@/app/generated/prisma/client";
-
+import { visibleLanguageFilter } from "@/lib/backend-access";
 export async function POST(request: Request) {
   try {
     const session = await auth();
@@ -27,6 +27,7 @@ export async function POST(request: Request) {
     await prisma.vocs.delete({
       where: {
         id,
+        ...visibleLanguageFilter(session.user.role),
       },
     });
 

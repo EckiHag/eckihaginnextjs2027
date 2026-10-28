@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 import { UserRole } from "@/app/generated/prisma/client";
+import { isBackendLanguage, visibleLanguageFilter } from "@/lib/backend-access";
 
 async function checkAccess() {
   const session = await auth();
@@ -22,11 +23,16 @@ export async function GET() {
   const denied = await checkAccess();
   if (denied) return denied;
 
-  // Hier folgt deine vorhandene Shortcut-Abfrage.
+  const session = await auth();
+
+  if (!session?.user) {
+    return Response.json({ error: "Bitte melde dich an." }, { status: 401 });
+  }
 
   const shortcuts = await prisma.shortcut.findMany({
     where: {
       aktiv: true,
+      ...visibleLanguageFilter(session.user.role),
     },
     orderBy: {
       sort: "asc",
@@ -41,12 +47,18 @@ export async function PUT(request: Request) {
     const denied = await checkAccess();
     if (denied) return denied;
 
-    // Hier folgt dein vorhandenes:
-    // const body = await request.json();
+    const session = await auth();
+
+    if (!session?.user) {
+      return Response.json({ error: "Bitte melde dich an." }, { status: 401 });
+    }
     const body = await request.json();
 
     const id = Number(body.id);
     const sprache = body.sprache ?? "";
+    if (session.user.role !== "ADMIN" && isBackendLanguage(sprache)) {
+      return Response.json({ error: "Dieser Bereich ist nur für Administratoren zugänglich." }, { status: 403 });
+    }
     const book = body.book ?? "";
     const chapter = body.chapter ?? "";
 
@@ -64,6 +76,7 @@ export async function PUT(request: Request) {
     const shortcut = await prisma.shortcut.update({
       where: {
         id,
+        ...visibleLanguageFilter(session.user.role),
       },
       data: {
         sprache,

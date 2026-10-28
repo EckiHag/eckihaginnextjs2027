@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 import { UserRole } from "@/app/generated/prisma/client";
+import { isBackendLanguage, visibleLanguageFilter } from "@/lib/backend-access";
+
 export async function POST(request: Request) {
   try {
     const session = await auth();
@@ -40,9 +42,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Keine Vokabel-ID übergeben." }, { status: 400 });
     }
 
+    if (session.user.role !== "ADMIN" && isBackendLanguage(sprache)) {
+      return NextResponse.json({ error: "Dieser Bereich ist nur für Administratoren zugänglich." }, { status: 403 });
+    }
     const updatedVoc = await prisma.vocs.update({
       where: {
         id: Number(id),
+        ...visibleLanguageFilter(session.user.role),
       },
 
       data: {

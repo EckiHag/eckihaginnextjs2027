@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import VokabelAuswahl from "./VokabelAuswahl";
 import { auth } from "@/auth";
+import { visibleLanguageFilter } from "@/lib/backend-access";
 export const dynamic = "force-dynamic";
 
 // const session = await auth();
@@ -43,6 +44,7 @@ export default async function VokabelnPage() {
    */
   const languageRows = await prisma.vocs.findMany({
     where: {
+      AND: [visibleLanguageFilter(session.user.role)],
       sprache: {
         not: "",
       },

@@ -3,6 +3,8 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { UserRole } from "@/app/generated/prisma/client";
+import { isBackendLanguage } from "@/lib/backend-access";
+
 export async function POST(request: Request) {
   try {
     /*
@@ -37,7 +39,9 @@ export async function POST(request: Request) {
     const language = String(body.language ?? "");
     const book = String(body.book ?? "");
     const chapter = String(body.chapter ?? "");
-
+    if (session.user.role !== "ADMIN" && isBackendLanguage(language)) {
+      return NextResponse.json({ error: "Dieser Bereich ist nur für Administratoren zugänglich." }, { status: 403 });
+    }
     /*
      * 3. Auswahl beim Benutzer speichern
      */

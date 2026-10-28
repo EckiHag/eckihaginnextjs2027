@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 import { UserRole } from "@/app/generated/prisma/client";
+import { isBackendLanguage } from "@/lib/backend-access";
 
 export async function POST(request: Request) {
   try {
@@ -38,7 +39,9 @@ export async function POST(request: Request) {
       fraseuebersetzung,
       datum,
     } = body;
-
+    if (session.user.role !== "ADMIN" && isBackendLanguage(sprache)) {
+      return NextResponse.json({ error: "Dieser Bereich ist nur für Administratoren zugänglich." }, { status: 403 });
+    }
     const newVoc = await prisma.vocs.create({
       data: {
         ord: Number(ord ?? 0),
