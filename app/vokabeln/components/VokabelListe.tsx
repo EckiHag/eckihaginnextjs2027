@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import type { Voc } from "../types";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { MessageSquareText, Languages, Pencil, Trash2 } from "lucide-react";
 import VokabelEditor from "./VokabelEditor";
 
@@ -22,10 +21,21 @@ type VokabelListeProps = {
   saving: boolean;
 };
 
+type TooltipTyp = "frontSentence" | "backSentence" | "backWord" | null;
+
 export default function VokabelListe({ vocs, reversed, editingId, editVoc, setEditVoc, onEdit, onDelete, onSave, onCancel, saving }: VokabelListeProps) {
-  const [openId, setOpenId] = useState<number | null>(null);
-  const [exampleOpenId, setExampleOpenId] = useState<number | null>(null);
-  const [translationOpenId, setTranslationOpenId] = useState<number | null>(null);
+  const [tooltipId, setTooltipId] = useState<number | null>(null);
+  const [tooltipTyp, setTooltipTyp] = useState<TooltipTyp>(null);
+
+  function openTooltip(id: number, typ: Exclude<TooltipTyp, null>) {
+    setTooltipId(id);
+    setTooltipTyp(typ);
+  }
+
+  function closeTooltip() {
+    setTooltipId(null);
+    setTooltipTyp(null);
+  }
 
   return (
     <div className="ml-auto w-full overflow-hidden rounded-xl border border-border bg-card">
@@ -51,7 +61,7 @@ export default function VokabelListe({ vocs, reversed, editingId, editVoc, setEd
           <div key={voc.id} className={editingId === voc.id ? "border-b border-border bg-area-blue last:border-b-0" : "border-b border-border last:border-b-0"}>
             {/* Listenzeile */}
             <div className="px-4 py-3">
-              <div className="ml-auto flex w-full max-w-80 min-w-0 items-center justify-between gap-3">
+              <div className="relative ml-auto flex w-full max-w-100 min-w-0 items-center justify-between gap-3">
                 {/* LINKS: Wort */}
                 <div className="min-w-0 flex-1">
                   <span
@@ -84,75 +94,84 @@ export default function VokabelListe({ vocs, reversed, editingId, editVoc, setEd
                     <Pencil className="h-4 w-4" />
                   </button>
 
-                  {/* Beispielsatz Rückseite / Übersetzung */}
+                  {/* Übersetzung des Beispielsatzes */}
                   {backSentence && (
-                    <Popover open={translationOpenId === voc.id} onOpenChange={(open) => setTranslationOpenId(open ? voc.id : null)}>
-                      <PopoverTrigger
-                        className="flex h-5 w-5 items-center justify-center cursor-none"
-                        onMouseEnter={() => setTranslationOpenId(voc.id)}
-                        onMouseLeave={() => setTranslationOpenId(null)}
-                        title="Übersetzung des Beispielsatzes"
-                      >
-                        <MessageSquareText className="h-4 w-4 text-muted-foreground" />
-                      </PopoverTrigger>
-
-                      <PopoverContent className="w-auto max-w-sm" onMouseEnter={() => setTranslationOpenId(voc.id)} onMouseLeave={() => setTranslationOpenId(null)}>
-                        <div
-                          className="whitespace-pre-line text-sm leading-relaxed"
-                          dangerouslySetInnerHTML={{
-                            __html: backSentence,
-                          }}
-                        />
-                      </PopoverContent>
-                    </Popover>
+                    <button
+                      type="button"
+                      title="Übersetzung des Beispielsatzes"
+                      onMouseEnter={() => openTooltip(voc.id, "backSentence")}
+                      onMouseLeave={closeTooltip}
+                      className="flex h-5 w-5 items-center justify-center text-muted-foreground transition hover:text-foreground"
+                    >
+                      <MessageSquareText className="h-4 w-4" />
+                    </button>
                   )}
 
-                  {/* Beispielsatz Vorderseite */}
+                  {/* Beispielsatz */}
                   {frontSentence && (
-                    <Popover open={exampleOpenId === voc.id} onOpenChange={(open) => setExampleOpenId(open ? voc.id : null)}>
-                      <PopoverTrigger
-                        className="flex h-5 w-5 items-center justify-center cursor-none"
-                        onMouseEnter={() => setExampleOpenId(voc.id)}
-                        onMouseLeave={() => setExampleOpenId(null)}
-                        title="Beispielsatz"
-                      >
-                        <MessageSquareText className="h-4 w-4 text-muted-foreground" />
-                      </PopoverTrigger>
-
-                      <PopoverContent className="w-auto max-w-sm" onMouseEnter={() => setExampleOpenId(voc.id)} onMouseLeave={() => setExampleOpenId(null)}>
-                        <div
-                          className="whitespace-pre-line text-sm leading-relaxed"
-                          dangerouslySetInnerHTML={{
-                            __html: frontSentence,
-                          }}
-                        />
-                      </PopoverContent>
-                    </Popover>
+                    <button
+                      type="button"
+                      title="Beispielsatz"
+                      onMouseEnter={() => openTooltip(voc.id, "frontSentence")}
+                      onMouseLeave={closeTooltip}
+                      className="flex h-5 w-5 items-center justify-center text-muted-foreground transition hover:text-foreground"
+                    >
+                      <MessageSquareText className="h-4 w-4" />
+                    </button>
                   )}
 
-                  {/* NEU: Übersetzung des Wortes */}
+                  {/* Übersetzung des Wortes */}
                   {backWord && (
-                    <Popover open={openId === voc.id} onOpenChange={(open) => setOpenId(open ? voc.id : null)}>
-                      <PopoverTrigger
-                        className="flex h-5 w-5 items-center justify-center cursor-none"
-                        onMouseEnter={() => setOpenId(voc.id)}
-                        onMouseLeave={() => setOpenId(null)}
-                        title="Übersetzung"
-                      >
-                        <Languages className="h-4 w-4 text-muted-foreground" />
-                      </PopoverTrigger>
-
-                      <PopoverContent className="w-auto max-w-xs" onMouseEnter={() => setOpenId(voc.id)} onMouseLeave={() => setOpenId(null)}>
-                        <div
-                          className="whitespace-pre-line text-sm"
-                          dangerouslySetInnerHTML={{
-                            __html: backWord ?? "",
-                          }}
-                        />
-                      </PopoverContent>
-                    </Popover>
+                    <button
+                      type="button"
+                      title="Übersetzung"
+                      onMouseEnter={() => openTooltip(voc.id, "backWord")}
+                      onMouseLeave={closeTooltip}
+                      className="flex h-5 w-5 items-center justify-center text-muted-foreground transition hover:text-foreground"
+                    >
+                      <Languages className="h-4 w-4" />
+                    </button>
                   )}
                 </div>
+
+                {/* GEMEINSAMER TOOLTIP */}
+                {tooltipId === voc.id && tooltipTyp && (
+                  <div
+                    className="absolute left-0 top-full z-50 mt-2 w-max max-w-sm rounded-md border border-border bg-popover px-3 py-2 text-popover-foreground shadow-md"
+                    onMouseEnter={() => setTooltipId(voc.id)}
+                    onMouseLeave={closeTooltip}
+                  >
+                    {/* Beispielsatz */}
+                    {tooltipTyp === "frontSentence" && (
+                      <div
+                        className="whitespace-pre-line text-sm leading-relaxed"
+                        dangerouslySetInnerHTML={{
+                          __html: frontSentence ?? "",
+                        }}
+                      />
+                    )}
+
+                    {/* Übersetzung des Beispielsatzes */}
+                    {tooltipTyp === "backSentence" && (
+                      <div
+                        className="whitespace-pre-line text-sm leading-relaxed"
+                        dangerouslySetInnerHTML={{
+                          __html: backSentence ?? "",
+                        }}
+                      />
+                    )}
+
+                    {/* Übersetzung des Wortes */}
+                    {tooltipTyp === "backWord" && (
+                      <div
+                        className="whitespace-pre-line text-sm"
+                        dangerouslySetInnerHTML={{
+                          __html: backWord ?? "",
+                        }}
+                      />
+                    )}
+                  </div>
+                )}
               </div>
             </div>
 
