@@ -39,7 +39,8 @@ export default function VokabelListe({ vocs, reversed, editingId, editVoc, setEd
 
   return (
     <div className="ml-auto w-full overflow-hidden rounded-xl border border-border bg-card">
-      {vocs.map((voc) => {
+      {vocs.map((voc, index) => {
+        const tooltipNachOben = index >= Math.ceil(vocs.length / 2);
         /*
          * Fremdsprachenwort einschließlich Artikel.
          * Der Artikel gehört immer zum Fremdsprachenwort.
@@ -137,7 +138,9 @@ export default function VokabelListe({ vocs, reversed, editingId, editVoc, setEd
                 {/* GEMEINSAMER TOOLTIP */}
                 {tooltipId === voc.id && tooltipTyp && (
                   <div
-                    className="absolute left-0 top-full z-50 mt-2 w-max max-w-sm rounded-md border border-border bg-popover px-3 py-2 text-popover-foreground shadow-md"
+                    className={`absolute left-0 z-50 w-max max-w-sm rounded-md border border-border bg-popover px-3 py-2 text-popover-foreground shadow-md ${
+                      tooltipNachOben ? "bottom-full mb-2" : "top-full mt-2"
+                    }`}
                     onMouseEnter={() => setTooltipId(voc.id)}
                     onMouseLeave={closeTooltip}
                   >
