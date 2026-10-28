@@ -54,8 +54,33 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
-        token.role = user.role as UserRole;
       }
+
+      const userId = Number(token.id);
+
+      if (!Number.isSafeInteger(userId) || userId <= 0) {
+        return null;
+      }
+
+      const currentUser = await prisma.userEckiHack.findUnique({
+        where: {
+          id: userId,
+        },
+        select: {
+          id: true,
+          name: true,
+          role: true,
+          active: true,
+        },
+      });
+
+      if (!currentUser || !currentUser.active) {
+        return null;
+      }
+
+      token.id = String(currentUser.id);
+      token.role = currentUser.role;
+      token.name = currentUser.name;
 
       return token;
     },

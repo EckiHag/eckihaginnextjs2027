@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { saveDate } from "../actions";
-
+import { requireApprovedUser } from "@/lib/require-approved-user";
 type KalenderBearbeitenPageProps = {
   params: Promise<{
     oid: string;
@@ -11,6 +11,8 @@ type KalenderBearbeitenPageProps = {
 };
 
 export default async function KalenderBearbeitenPage({ params }: KalenderBearbeitenPageProps) {
+  await requireApprovedUser();
+
   const { oid } = await params;
 
   const date = await prisma.dates.findUnique({
