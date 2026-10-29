@@ -21,23 +21,7 @@ import type { UserRole } from "@/app/generated/prisma/client";
 type AppSidebarProps = {
   userRole?: UserRole;
 };
-// const vocabularyNavigation = [
-//   {
-//     title: "Anzeigen",
-//     href: "/vokabeln",
-//     icon: List,
-//   },
-//   {
-//     title: "Suchen",
-//     href: "/vokabeln/suchen",
-//     icon: Search,
-//   },
-//   {
-//     title: "Drucken",
-//     href: "/vokabeln/drucken",
-//     icon: Printer,
-//   },
-// ];
+
 const gamesNavigation = [
   {
     title: "Hangman",
@@ -62,8 +46,13 @@ const gamesNavigation = [
 ];
 const administrationNavigation = [
   {
-    title: "DesignTestPage",
-    href: "/designtestpage",
+    title: "User",
+    href: "/verwaltung/benutzer",
+    icon: Database,
+  },
+  {
+    title: "Design",
+    href: "/design",
     icon: Database,
   },
   {
@@ -164,18 +153,6 @@ export function AppSidebar({ userRole }: AppSidebarProps) {
                       <span>Vokabeln</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
-                  {/* ---Daten--- */}
-                  <SidebarMenuItem>
-                    <SidebarMenuButton
-                      render={<Link href="/daten" onClick={closeMobileSidebar} />}
-                      tooltip="Daten"
-                      isActive={pathname === "/daten"}
-                      className={pathname === "/daten" ? "bg-amber-100 font-semibold text-amber-900 hover:bg-amber-200" : "hover:bg-muted"}
-                    >
-                      <Users />
-                      <span>Daten</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
                   {/* ---Kalender--- */}
                   <SidebarMenuItem>
                     <SidebarMenuButton
@@ -250,6 +227,23 @@ export function AppSidebar({ userRole }: AppSidebarProps) {
                       ))}
                     </ul>
                   )}
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    type="button"
+                    tooltip="Spielen"
+                    isActive={gamesIsActive}
+                    onClick={() => setGamesOpen((open) => !open)}
+                    className={gamesIsActive ? "bg-amber-100 font-semibold text-amber-900 hover:bg-amber-200" : "hover:bg-muted"}
+                  >
+                    <span>Links</span>
+
+                    <ChevronDown className={`ml-auto transition-transform ${gamesOpen ? "rotate-180" : ""}`} />
+                  </SidebarMenuButton>
                 </SidebarMenuItem>
               </SidebarMenu>
             </SidebarGroupContent>
