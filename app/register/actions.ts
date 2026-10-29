@@ -3,6 +3,7 @@
 import bcrypt from "bcrypt";
 import { prisma } from "@/lib/prisma";
 import { Prisma, UserRole } from "@/app/generated/prisma/client";
+import { sendAdminRegistrationEmail } from "@/lib/mailing";
 
 type RegisterResult = {
   status: "success" | "error";
@@ -76,9 +77,19 @@ export async function registerUser(data: FormData): Promise<RegisterResult> {
       },
     });
 
+    try {
+      await sendAdminRegistrationEmail({
+        username,
+        name,
+        email,
+      });
+    } catch (mailError) {
+      console.error("Benutzerkonto erstellt, aber Admin-Benachrichtigung fehlgeschlagen:", mailError);
+    }
+
     return {
       status: "success",
-      message: "Dein Konto wurde erstellt. Du kannst dich jetzt anmelden.",
+      message: "Dein Konto wurde erstellt. Du kannst dich jetzt anmelden. Eine Freischaltung für Content erfolgt erst nach Freigabe durch Admin. Admin hat eine Mail erhalten.",
     };
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {

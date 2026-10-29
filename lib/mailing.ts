@@ -23,7 +23,7 @@ export async function sendPasswordResetEmail(email: string, token: string) {
 
   await transporter.sendMail({
     from: {
-      name: "EckiHag",
+      name: "EckiHack",
       address: user,
     },
     to: email,
@@ -41,7 +41,48 @@ export async function sendPasswordResetEmail(email: string, token: string) {
       "Falls du diese Anfrage nicht gestellt hast, kannst du diese E-Mail ignorieren.",
       "",
       "Viele Grüße",
-      "EckiHag",
+      "EckiHack",
+    ].join("\n"),
+  });
+}
+export async function sendAdminRegistrationEmail(newUser: { username: string; name: string; email: string }) {
+  const service = process.env.SMTP_SERVICE;
+  const user = process.env.SMTP_USER;
+  const pass = process.env.SMTP_PASS;
+  const adminEmail = process.env.ADMIN_EMAIL;
+  const appUrl = process.env.APP_URL;
+
+  if (!service || !user || !pass || !adminEmail || !appUrl) {
+    throw new Error("Die Einstellungen für die Admin-E-Mail fehlen.");
+  }
+
+  const transporter = nodemailer.createTransport({
+    service,
+    auth: {
+      user,
+      pass,
+    },
+  });
+
+  const administrationUrl = new URL("/verwaltung/benutzer", appUrl);
+
+  await transporter.sendMail({
+    from: {
+      name: "EckiHack",
+      address: user,
+    },
+    to: adminEmail,
+    subject: "EckiHack: Neues Benutzerkonto wartet auf Freischaltung",
+    text: [
+      "Ein neues Benutzerkonto wurde registriert.",
+      "",
+      `Benutzername: ${newUser.username}`,
+      `Name: ${newUser.name || "Nicht angegeben"}`,
+      `E-Mail: ${newUser.email}`,
+      "Rolle: NEWBIE",
+      "",
+      "Öffne die Benutzerverwaltung, um das Konto zu prüfen und freizuschalten:",
+      administrationUrl.toString(),
     ].join("\n"),
   });
 }

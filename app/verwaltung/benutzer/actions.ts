@@ -104,3 +104,39 @@ export async function setUserActive(formData: FormData) {
 
   refresh();
 }
+export async function changeUserRole(formData: FormData) {
+  const session = await auth();
+
+  if (!session?.user) {
+    redirect("/login");
+  }
+
+  if (session.user.role !== "ADMIN") {
+    notFound();
+  }
+
+  const userId = Number(formData.get("userId"));
+  const requestedRole = String(formData.get("role") ?? "");
+
+  const allowedRoles: UserRole[] = [UserRole.NEWBIE, UserRole.USER, UserRole.EDITOR];
+
+  const nextRole = allowedRoles.find((role) => role === requestedRole);
+
+  if (!Number.isSafeInteger(userId) || userId <= 0 || !nextRole) {
+    throw new Error("Ungültige Benutzer-ID oder Rolle.");
+  }
+
+  await prisma.userEckiHack.updateMany({
+    where: {
+      id: userId,
+      role: {
+        not: UserRole.ADMIN,
+      },
+    },
+    data: {
+      role: nextRole,
+    },
+  });
+
+  refresh();
+}

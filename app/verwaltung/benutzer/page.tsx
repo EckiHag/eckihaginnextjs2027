@@ -2,7 +2,7 @@ import { notFound, redirect } from "next/navigation";
 
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { approveUser, setUserToNewbie, setUserActive } from "./actions";
+import { approveUser, setUserToNewbie, setUserActive, changeUserRole } from "./actions";
 
 export default async function BenutzerPage() {
   const session = await auth();
@@ -91,6 +91,39 @@ export default async function BenutzerPage() {
                 {user.active && user.role === "NEWBIE" && <p className="mb-3 text-xs text-muted-foreground">Wartet auf Freischaltung.</p>}
 
                 <div className="flex flex-wrap items-center gap-2">
+                  <form key={user.role} action={changeUserRole} className="flex items-center gap-2">
+                    <input type="hidden" name="userId" value={user.id} />
+
+                    <label htmlFor={`role-${user.id}`} className="sr-only">
+                      Rolle für {user.username}
+                    </label>
+
+                    <select
+                      id={`role-${user.id}`}
+                      name="role"
+                      defaultValue={user.role}
+                      className="min-h-9 rounded-md border border-input
+               bg-background px-2 py-1.5 text-xs
+               text-foreground
+               focus-visible:outline-2
+               focus-visible:outline-offset-2
+               focus-visible:outline-amber-600"
+                    >
+                      <option value="NEWBIE">NEWBIE</option>
+                      <option value="USER">USER</option>
+                      <option value="EDITOR">EDITOR</option>
+                    </select>
+
+                    <button
+                      type="submit"
+                      className={`${actionButtonClass}
+                border-border bg-muted text-foreground
+                hover:bg-muted/70
+                focus-visible:outline-amber-600`}
+                    >
+                      Übernehmen
+                    </button>
+                  </form>
                   {user.active && user.role === "NEWBIE" && (
                     <form action={approveUser}>
                       <input type="hidden" name="userId" value={user.id} />
