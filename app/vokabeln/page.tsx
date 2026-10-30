@@ -114,11 +114,10 @@ export default async function VokabelnPage() {
           },
           select: {
             chapter: true,
-            kapitel: true,
           },
-          distinct: ["chapter", "kapitel"],
+          distinct: ["chapter"],
           orderBy: {
-            kapitel: "asc",
+            chapter: "asc",
           },
         })
       : [];

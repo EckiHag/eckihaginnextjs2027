@@ -21,7 +21,6 @@ const shortcutIcons = {
 };
 type ChapterOption = {
   chapter: string;
-  kapitel: number;
 };
 
 type VokabelAuswahlProps = {
@@ -548,8 +547,8 @@ export default function VokabelAuswahl({ initialLanguages, initialLanguage, init
                 className="w-full min-w-0 rounded-lg border border-border bg-background px-3 py-2.5 text-base text-foreground outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/30 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {chapters.map((item) => (
-                  <option key={`${item.kapitel}-${item.chapter}`} value={item.chapter}>
-                    {item.chapter || `Kapitel ${item.kapitel}`}
+                  <option key={item.chapter} value={item.chapter}>
+                    {item.chapter}
                   </option>
                 ))}
               </select>
