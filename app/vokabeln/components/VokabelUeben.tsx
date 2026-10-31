@@ -7,6 +7,7 @@ import { Eye, RotateCw, ArrowRight, ArrowLeft, Pencil, Shuffle } from "lucide-re
 type VokabelUebenProps = {
   vocs: Voc[];
   reversed: boolean;
+  sentencesOnly: boolean;
   onEdit: (voc: Voc) => void;
 };
 
@@ -27,7 +28,7 @@ function mischen(vokabeln: Voc[]) {
   return gemischt;
 }
 
-export default function VokabelUeben({ vocs, reversed, onEdit }: VokabelUebenProps) {
+export default function VokabelUeben({ vocs, reversed, sentencesOnly, onEdit }: VokabelUebenProps) {
   const [setGroesse, setSetGroesse] = useState(12);
   const [karten, setKarten] = useState<Voc[]>(() => mischen(vocs.slice(0, 12)));
   const [index, setIndex] = useState(0);
@@ -181,7 +182,9 @@ export default function VokabelUeben({ vocs, reversed, onEdit }: VokabelUebenPro
   if (vocs.length === 0) {
     return (
       <div className="vokabel-uebung w-full max-w-xl p-4">
-        <div className="rounded-xl border border-dashed p-5 text-center text-sm text-slate-500">Keine Vokabeln zum Üben vorhanden.</div>
+        <div className="rounded-xl border border-dashed p-5 text-center text-sm text-slate-500">
+          {sentencesOnly ? "Für diese Auswahl sind keine Beispielsätze mit Übersetzung vorhanden." : "Keine Vokabeln zum Üben vorhanden."}
+        </div>
       </div>
     );
   }
@@ -390,9 +393,17 @@ export default function VokabelUeben({ vocs, reversed, onEdit }: VokabelUebenPro
 
         <div className="mt-4 min-h-0 flex-1 overflow-y-auto text-center">
           <div className="flex min-h-full flex-col items-center justify-start gap-5 px-2 pb-2">
-            <div className="w-full whitespace-pre-line wrap-break-word text-2xl font-bold text-slate-900">{rueckseiteSichtbar ? backWord : frontWord}</div>
+            {sentencesOnly ? (
+              <div className="w-full whitespace-pre-line wrap-break-word text-2xl font-medium leading-relaxed text-slate-900 sm:text-3xl">
+                {rueckseiteSichtbar ? backSentence : frontSentence}
+              </div>
+            ) : (
+              <>
+                <div className="w-full whitespace-pre-line wrap-break-word text-2xl font-bold text-slate-900">{rueckseiteSichtbar ? backWord : frontWord}</div>
 
-            <div className="w-full whitespace-pre-line wrap-break-word text-sm leading-relaxed text-slate-600">{rueckseiteSichtbar ? backSentence : frontSentence}</div>
+                <div className="w-full whitespace-pre-line wrap-break-word text-sm leading-relaxed text-slate-600">{rueckseiteSichtbar ? backSentence : frontSentence}</div>
+              </>
+            )}
           </div>
         </div>
       </div>

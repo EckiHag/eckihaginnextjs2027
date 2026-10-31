@@ -4,6 +4,7 @@ import { Trash2 } from "lucide-react";
 type VokabelKartenProps = {
   vocs: Voc[];
   reversed: boolean;
+  sentencesOnly: boolean;
   editingId: number | null;
   editVoc: Voc | null;
 
@@ -17,13 +18,59 @@ type VokabelKartenProps = {
   saving: boolean;
 };
 
-// return (
-//   <div>
-//     {[...vocs]
-//       .sort((a, b) => Number(a.id) - Number(b.id))
-//       .map((voc) => (
+export default function VokabelKarten({ vocs, reversed, sentencesOnly, editingId, editVoc, setEditVoc, onEdit, onDelete, onSave, onCancel, saving }: VokabelKartenProps) {
+  if (sentencesOnly) {
+    if (vocs.length === 0) {
+      return (
+        <div className="rounded-xl border border-dashed border-border p-5 text-center text-sm text-muted-foreground">
+          Für diese Auswahl sind keine Beispielsätze mit Übersetzung vorhanden.
+        </div>
+      );
+    }
 
-export default function VokabelKarten({ vocs, reversed, editingId, editVoc, setEditVoc, onEdit, onDelete, onSave, onCancel, saving }: VokabelKartenProps) {
+    return (
+      <div className="grid gap-4">
+        {vocs.map((voc) => {
+          const frontSentence = reversed ? voc.beispielsatzuebersetzung : voc.beispielsatz;
+
+          const backSentence = reversed ? voc.beispielsatz : voc.beispielsatzuebersetzung;
+
+          return (
+            <article key={voc.id} className="min-w-0 rounded-xl border border-border bg-card p-4 shadow-sm sm:p-6">
+              {editingId === voc.id && editVoc ? (
+                <VokabelEditor editVoc={editVoc} setEditVoc={setEditVoc} onSave={onSave} onCancel={onCancel} loading={saving} />
+              ) : (
+                <>
+                  <div className="mb-4 flex justify-end">
+                    <button type="button" onClick={() => onEdit(voc)} className="rounded-lg border border-border px-3 py-2 text-sm font-medium transition hover:bg-muted">
+                      Bearbeiten
+                    </button>
+                  </div>
+
+                  <div
+                    className="whitespace-pre-line wrap-break-word text-2xl font-medium leading-relaxed text-foreground sm:text-3xl [&_a]:text-primary [&_a]:underline [&_a]:underline-offset-2"
+                    dangerouslySetInnerHTML={{
+                      __html: frontSentence ?? "",
+                    }}
+                  />
+
+                  <hr className="my-5 border-border" />
+
+                  <div
+                    className="whitespace-pre-line wrap-break-word text-2xl leading-relaxed text-muted-foreground sm:text-3xl [&_a]:text-primary [&_a]:underline [&_a]:underline-offset-2"
+                    dangerouslySetInnerHTML={{
+                      __html: backSentence ?? "",
+                    }}
+                  />
+                </>
+              )}
+            </article>
+          );
+        })}
+      </div>
+    );
+  }
+
   return (
     <div>
       {vocs.map((voc) => {

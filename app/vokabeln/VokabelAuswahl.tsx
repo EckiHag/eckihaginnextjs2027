@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { BookOpen, BookMarked, NotebookPen, Languages, Boxes, ScrollText, BookText, Save, LoaderCircle, ArrowRightLeft } from "lucide-react";
 import VokabelKarten from "./components/VokabelKarten";
 import VokabelListe from "./components/VokabelListe";
@@ -97,8 +97,53 @@ export default function VokabelAuswahl({ initialLanguages, initialLanguage, init
   const [viewMode, setViewMode] = useState<"liste" | "karten" | "ueben">("liste");
 
   const [reversed, setReversed] = useState(false);
+  const [sentencesOnly, setSentencesOnly] = useState(false);
 
   const router = useRouter();
+  const csvInputRef = useRef<HTMLInputElement>(null);
+  const [csvFile, setCsvFile] = useState<File | null>(null);
+  const [importing, setImporting] = useState(false);
+  const [importMessage, setImportMessage] = useState("");
+  const [importError, setImportError] = useState("");
+
+  async function handleCsvImport() {
+    if (!csvFile || importing) {
+      return;
+    }
+
+    setImporting(true);
+    setImportMessage("");
+    setImportError("");
+
+    try {
+      const formData = new FormData();
+      formData.append("file", csvFile);
+
+      const response = await fetch("/api/vokabeln/import", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = (await response.json()) as {
+        count?: number;
+        message?: string;
+        error?: string;
+      };
+
+      if (!response.ok) {
+        throw new Error(data.error ?? "Der Import ist fehlgeschlagen.");
+      }
+
+      setImportMessage(data.message ?? `${data.count ?? 0} Datensätze wurden importiert.`);
+
+      // Verhindert ein versehentliches erneutes Importieren per Button.
+      setCsvFile(null);
+    } catch (error) {
+      setImportError(error instanceof Error ? error.message : "Der Import konnte nicht abgeschlossen werden.");
+    } finally {
+      setImporting(false);
+    }
+  }
 
   async function fetchJson<T>(url: string): Promise<T> {
     const response = await fetch(url, {
@@ -339,6 +384,8 @@ export default function VokabelAuswahl({ initialLanguages, initialLanguage, init
     );
   });
 
+  const practiceVocs = sentencesOnly ? filteredVocs.filter((voc) => voc.beispielsatz?.trim() && voc.beispielsatzuebersetzung?.trim()) : filteredVocs;
+
   function startEditing(voc: Voc) {
     setEditingId(voc.id);
     setEditVoc({ ...voc });
@@ -462,38 +509,103 @@ export default function VokabelAuswahl({ initialLanguages, initialLanguage, init
   return (
     <section className="mx-auto w-full max-w-6xl px-3 py-4 sm:px-5 sm:py-5 lg:px-6 lg:py-6">
       <div className="rounded-xl border border-border bg-area-blue p-4 shadow-sm sm:p-5">
-        {/* Shortcuts */}
-        {shortcuts.length > 0 && (
-          <div className="mb-4 flex flex-wrap gap-2">
-            {shortcuts.map((shortcut) => {
-              const Icon = shortcutIcons[shortcut.icon as keyof typeof shortcutIcons];
+        {/* Shortcuts und CSV-Import */}
+        <div className="mb-4 flex flex-wrap items-center gap-2">
+          {shortcuts.map((shortcut) => {
+            const Icon = shortcutIcons[shortcut.icon as keyof typeof shortcutIcons];
 
-              return (
-                <div key={shortcut.id} className="flex items-center gap-1">
-                  {/* Shortcut aufrufen */}
-                  <button
-                    type="button"
-                    onClick={() => void handleShortcutClick(shortcut)}
-                    disabled={loading}
-                    className="flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2 transition hover:bg-muted disabled:opacity-50"
-                  >
-                    {Icon && <Icon className="h-5 w-5" />}
-                    <span>{shortcut.titel}</span>
-                  </button>
+            return (
+              <div key={shortcut.id} className="flex items-center gap-1">
+                {/* Shortcut aufrufen */}
+                <button
+                  type="button"
+                  onClick={() => void handleShortcutClick(shortcut)}
+                  disabled={loading}
+                  className="flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2 transition hover:bg-muted disabled:opacity-50"
+                >
+                  {Icon && <Icon className="h-5 w-5" />}
+                  <span>{shortcut.titel}</span>
+                </button>
 
-                  {/* Aktuelle Auswahl in diesem Shortcut speichern */}
-                  <button
-                    type="button"
-                    onClick={() => void handleSaveShortcut(shortcut.id)}
-                    disabled={loading}
-                    title="Aktuelle Auswahl als Shortcut speichern"
-                    className="rounded-lg border border-border p-2.5 transition hover:bg-muted disabled:opacity-50"
-                  >
-                    <Save className="h-4 w-4" />
-                  </button>
-                </div>
-              );
-            })}
+                {/* Aktuelle Auswahl als Shortcut speichern */}
+                <button
+                  type="button"
+                  onClick={() => void handleSaveShortcut(shortcut.id)}
+                  disabled={loading}
+                  title="Aktuelle Auswahl als Shortcut speichern"
+                  className="rounded-lg border border-border p-2.5 transition hover:bg-muted disabled:opacity-50"
+                >
+                  <Save className="h-4 w-4" />
+                </button>
+              </div>
+            );
+          })}
+
+          {/* Versteckte Dateiauswahl */}
+          <input
+            ref={csvInputRef}
+            type="file"
+            accept=".csv,text/csv"
+            disabled={importing}
+            className="hidden"
+            onChange={(event) => {
+              const file = event.currentTarget.files?.[0];
+
+              if (file) {
+                setCsvFile(file);
+                setImportMessage("");
+                setImportError("");
+              }
+
+              event.currentTarget.value = "";
+            }}
+          />
+
+          <button
+            type="button"
+            onClick={() => csvInputRef.current?.click()}
+            disabled={loading || importing}
+            className="px-3 py-2 font-medium text-blue-600 underline underline-offset-4 hover:text-blue-800 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            CSV importieren
+          </button>
+        </div>
+
+        {/* Ausgewählte Datei und Import starten */}
+        {csvFile && (
+          <div aria-busy={importing} className="mb-4 flex flex-col gap-3 rounded-lg border border-border bg-card p-3 sm:flex-row sm:items-center">
+            <p className="min-w-0 break-words text-sm text-muted-foreground">
+              Ausgewählte Datei: <span className="font-medium text-foreground">{csvFile.name}</span>
+            </p>
+
+            <button
+              type="button"
+              onClick={() => void handleCsvImport()}
+              disabled={importing || loading}
+              className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 sm:ml-auto"
+            >
+              {importing && <LoaderCircle aria-hidden="true" className="h-4 w-4 animate-spin" />}
+
+              {importing ? "Import läuft …" : "Jetzt importieren"}
+            </button>
+          </div>
+        )}
+
+        {/* Fehlermeldung */}
+        {importError && (
+          <p role="alert" className="mb-4 rounded-lg border border-red-300 bg-red-50 p-3 text-sm text-red-800">
+            {importError}
+          </p>
+        )}
+
+        {/* Erfolgsmeldung */}
+        {importMessage && (
+          <div role="status" className="mb-4 rounded-lg border border-green-300 bg-green-50 p-3 text-sm text-green-800">
+            <p>{importMessage}</p>
+
+            <button type="button" onClick={() => window.location.reload()} className="mt-2 font-medium underline underline-offset-4 hover:text-green-950">
+              Seite und Auswahllisten neu laden
+            </button>
           </div>
         )}
 
@@ -678,7 +790,19 @@ export default function VokabelAuswahl({ initialLanguages, initialLanguage, init
                       Drehen
                     </span>
                   </button>
-
+                  {viewMode !== "liste" && (
+                    <button
+                      type="button"
+                      onClick={() => setSentencesOnly((current) => !current)}
+                      aria-pressed={sentencesOnly}
+                      title="Nur Beispielsätze und ihre Übersetzungen anzeigen"
+                      className={`rounded-lg px-4 py-2 text-sm font-medium transition ${
+                        sentencesOnly ? "bg-primary text-primary-foreground" : "border border-border hover:bg-muted"
+                      }`}
+                    >
+                      Nur Sätze
+                    </button>
+                  )}
                   <button
                     type="button"
                     onClick={() => router.push(`/vokabeln/neu?sprache=${encodeURIComponent(language)}&book=${encodeURIComponent(book)}&chapter=${encodeURIComponent(chapter)}`)}
@@ -706,8 +830,9 @@ export default function VokabelAuswahl({ initialLanguages, initialLanguage, init
 
                   {viewMode === "karten" && (
                     <VokabelKarten
-                      vocs={filteredVocs}
+                      vocs={practiceVocs}
                       reversed={reversed}
+                      sentencesOnly={sentencesOnly}
                       editingId={editingId}
                       editVoc={editVoc}
                       setEditVoc={setEditVoc}
@@ -721,9 +846,10 @@ export default function VokabelAuswahl({ initialLanguages, initialLanguage, init
 
                   {viewMode === "ueben" && (
                     <VokabelUeben
-                      key={filteredVocs.map((voc) => voc.id).join("-")}
-                      vocs={filteredVocs}
+                      key={`${sentencesOnly ? "saetze" : "vokabeln"}-${practiceVocs.map((voc) => voc.id).join("-")}`}
+                      vocs={practiceVocs}
                       reversed={reversed}
+                      sentencesOnly={sentencesOnly}
                       onEdit={(voc) => {
                         startEditing(voc);
                         setViewMode("ueben");
