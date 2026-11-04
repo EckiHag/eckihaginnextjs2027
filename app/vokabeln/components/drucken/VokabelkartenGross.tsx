@@ -69,6 +69,7 @@ export default function VokabelkartenGross({ vocs }: VokabelkartenGrossProps) {
 
         const artikel = stripHtml(voc.artikel);
         const wort = stripHtml(voc.wort);
+        const frase = stripHtml(voc.frase);
         const beispielsatz = stripHtml(voc.beispielsatz);
 
         const hauptwort = artikel ? `${artikel} ${wort}` : wort;
@@ -87,13 +88,28 @@ export default function VokabelkartenGross({ vocs }: VokabelkartenGrossProps) {
         doc.text(wordLines, x + 5, y + 16);
 
         const wordHeight = wordLines.length * 5;
+        let textY = y + 18 + wordHeight;
+        const maxY = y + boxHeight - 5;
 
-        if (beispielsatz) {
+        if (frase && textY < maxY) {
           doc.setFontSize(10);
 
-          const exampleLines = doc.splitTextToSize(beispielsatz, boxWidth - 10).slice(0, zeilenAufKarteVorne);
+          const phraseLines = doc.splitTextToSize(frase, boxWidth - 10).slice(0, Math.max(0, Math.floor((maxY - textY) / 5)));
 
-          doc.text(exampleLines, x + 5, y + 18 + wordHeight);
+          if (phraseLines.length > 0) {
+            doc.text(phraseLines, x + 5, textY);
+            textY += phraseLines.length * 5 + 2;
+          }
+        }
+
+        if (beispielsatz && textY < maxY) {
+          doc.setFontSize(10);
+
+          const exampleLines = doc.splitTextToSize(beispielsatz, boxWidth - 10).slice(0, Math.max(0, Math.floor((maxY - textY) / 5)));
+
+          if (exampleLines.length > 0) {
+            doc.text(exampleLines, x + 5, textY);
+          }
         }
       });
 
@@ -122,6 +138,8 @@ export default function VokabelkartenGross({ vocs }: VokabelkartenGrossProps) {
 
         const uebersetzung = stripHtml(voc.uebersetzung);
 
+        const fraseuebersetzung = stripHtml(voc.fraseuebersetzung);
+
         const beispielsatzuebersetzung = stripHtml(voc.beispielsatzuebersetzung);
 
         // ID klein oben rechts
@@ -139,13 +157,28 @@ export default function VokabelkartenGross({ vocs }: VokabelkartenGrossProps) {
         doc.text(translationLines, x + 5, y + 16);
 
         const translationHeight = translationLines.length * 5;
+        let textY = y + 18 + translationHeight;
+        const maxY = y + boxHeight - 5;
 
-        if (beispielsatzuebersetzung) {
+        if (fraseuebersetzung && textY < maxY) {
           doc.setFontSize(10);
 
-          const exampleTranslationLines = doc.splitTextToSize(beispielsatzuebersetzung, boxWidth - 10).slice(0, zeilenAufKarteHinten);
+          const phraseLines = doc.splitTextToSize(fraseuebersetzung, boxWidth - 10).slice(0, Math.max(0, Math.floor((maxY - textY) / 5)));
 
-          doc.text(exampleTranslationLines, x + 5, y + 18 + translationHeight);
+          if (phraseLines.length > 0) {
+            doc.text(phraseLines, x + 5, textY);
+            textY += phraseLines.length * 5 + 2;
+          }
+        }
+
+        if (beispielsatzuebersetzung && textY < maxY) {
+          doc.setFontSize(10);
+
+          const exampleLines = doc.splitTextToSize(beispielsatzuebersetzung, boxWidth - 10).slice(0, Math.max(0, Math.floor((maxY - textY) / 5)));
+
+          if (exampleLines.length > 0) {
+            doc.text(exampleLines, x + 5, textY);
+          }
         }
       });
 
@@ -169,7 +202,7 @@ export default function VokabelkartenGross({ vocs }: VokabelkartenGrossProps) {
       disabled={vocs.length === 0}
       className="rounded-lg border border-border px-4 py-2 text-sm font-medium transition hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
     >
-      Vokabelkarten groß drucken
+      VKgroß
     </button>
   );
 }

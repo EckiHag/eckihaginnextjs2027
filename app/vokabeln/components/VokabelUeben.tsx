@@ -203,6 +203,10 @@ export default function VokabelUeben({ vocs, reversed, sentencesOnly, onEdit }: 
 
   const backSentence = reversed ? voc.beispielsatz : voc.beispielsatzuebersetzung;
 
+  const frontPhrase = reversed ? voc.fraseuebersetzung : voc.frase;
+
+  const backPhrase = reversed ? voc.frase : voc.fraseuebersetzung;
+
   return (
     <div className="vokabel-uebung w-full max-w-xl space-y-5 p-4">
       {/* Set-Auswahl */}
@@ -394,12 +398,18 @@ export default function VokabelUeben({ vocs, reversed, sentencesOnly, onEdit }: 
         <div className="mt-4 min-h-0 flex-1 overflow-y-auto text-center">
           <div className="flex min-h-full flex-col items-center justify-start gap-5 px-2 pb-2">
             {sentencesOnly ? (
-              <div className="w-full whitespace-pre-line wrap-break-word text-2xl font-medium leading-relaxed text-slate-900 sm:text-3xl">
-                {rueckseiteSichtbar ? backSentence : frontSentence}
+              <div className="w-full space-y-4 text-2xl font-medium leading-relaxed text-slate-900 sm:text-3xl">
+                {(rueckseiteSichtbar ? backPhrase : frontPhrase) && <div className="whitespace-pre-line wrap-break-word">{rueckseiteSichtbar ? backPhrase : frontPhrase}</div>}
+
+                <div className="whitespace-pre-line wrap-break-word">{rueckseiteSichtbar ? backSentence : frontSentence}</div>
               </div>
             ) : (
               <>
                 <div className="w-full whitespace-pre-line wrap-break-word text-2xl font-bold text-slate-900">{rueckseiteSichtbar ? backWord : frontWord}</div>
+
+                {(rueckseiteSichtbar ? backPhrase : frontPhrase) && (
+                  <div className="w-full whitespace-pre-line wrap-break-word text-sm leading-relaxed text-slate-600">{rueckseiteSichtbar ? backPhrase : frontPhrase}</div>
+                )}
 
                 <div className="w-full whitespace-pre-line wrap-break-word text-sm leading-relaxed text-slate-600">{rueckseiteSichtbar ? backSentence : frontSentence}</div>
               </>

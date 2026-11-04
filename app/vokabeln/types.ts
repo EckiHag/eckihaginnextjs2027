@@ -17,4 +17,6 @@ export type Voc = {
   schwierigkeitsgrad: number;
   kapitel: number;
   kapiteltext: string;
+  frase: string;
+  fraseuebersetzung: string;
 };

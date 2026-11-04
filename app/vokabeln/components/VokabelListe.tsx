@@ -21,7 +21,7 @@ type VokabelListeProps = {
   saving: boolean;
 };
 
-type TooltipTyp = "frontSentence" | "backSentence" | "backWord" | null;
+type TooltipTyp = "frontSentence" | "backSentence" | "backWord" | "phrase" | null;
 
 export default function VokabelListe({ vocs, reversed, editingId, editVoc, setEditVoc, onEdit, onDelete, onSave, onCancel, saving }: VokabelListeProps) {
   const [tooltipId, setTooltipId] = useState<number | null>(null);
@@ -121,6 +121,19 @@ export default function VokabelListe({ vocs, reversed, editingId, editVoc, setEd
                     </button>
                   )}
 
+                  {/* Phrase und Phrase-Übersetzung */}
+                  {(voc.frase || voc.fraseuebersetzung) && (
+                    <button
+                      type="button"
+                      title="Phrase"
+                      onMouseEnter={() => openTooltip(voc.id, "phrase")}
+                      onMouseLeave={closeTooltip}
+                      className="flex h-5 w-5 items-center justify-center text-muted-foreground transition hover:text-foreground"
+                    >
+                      <MessageSquareText className="h-4 w-4" />
+                    </button>
+                  )}
+
                   {/* Übersetzung des Wortes */}
                   {backWord && (
                     <button
@@ -172,6 +185,23 @@ export default function VokabelListe({ vocs, reversed, editingId, editVoc, setEd
                           __html: backWord ?? "",
                         }}
                       />
+                    )}
+
+                    {/* Phrase und Übersetzung */}
+                    {tooltipTyp === "phrase" && (
+                      <div className="space-y-2 text-sm leading-relaxed">
+                        <div
+                          dangerouslySetInnerHTML={{
+                            __html: voc.frase ?? "",
+                          }}
+                        />
+                        {/* <div
+                          className="border-t border-border pt-2"
+                          dangerouslySetInnerHTML={{
+                            __html: voc.fraseuebersetzung ?? "",
+                          }}
+                        /> */}
+                      </div>
                     )}
                   </div>
                 )}

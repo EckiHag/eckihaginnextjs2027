@@ -574,7 +574,7 @@ export default function VokabelAuswahl({ initialLanguages, initialLanguage, init
         {/* Ausgewählte Datei und Import starten */}
         {csvFile && (
           <div aria-busy={importing} className="mb-4 flex flex-col gap-3 rounded-lg border border-border bg-card p-3 sm:flex-row sm:items-center">
-            <p className="min-w-0 break-words text-sm text-muted-foreground">
+            <p className="min-w-0 wrap-break-word text-sm text-muted-foreground">
               Ausgewählte Datei: <span className="font-medium text-foreground">{csvFile.name}</span>
             </p>
 

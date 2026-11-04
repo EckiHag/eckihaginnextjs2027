@@ -164,6 +164,8 @@ export default function VokabelkartenKlein({ vocs }: VokabelkartenKleinProps) {
 
         const wort = stripHtml(voc.wort);
 
+        const frase = stripHtml(voc.frase);
+
         const beispielsatz = stripHtml(voc.beispielsatz);
 
         const hauptwort = artikel ? `${artikel} ${wort}` : wort;
@@ -197,27 +199,36 @@ export default function VokabelkartenKlein({ vocs }: VokabelkartenKleinProps) {
           fontStyle: "bold",
         });
 
-        /*
-         * Beispielsatz beginnt
-         * unterhalb des Hauptwortes.
-         */
-        if (beispielsatz) {
-          const exampleY = wordY + wordResult.height + 2;
+        /* Phrase und Beispielsatz */
+        let textY = wordY + wordResult.height + 2;
+        const maxY = y + boxHeight - 4;
 
-          const availableHeight = y + boxHeight - 4 - exampleY;
+        if (frase && textY < maxY) {
+          const result = drawTextFitted({
+            text: frase,
+            x: x + 4,
+            y: textY,
+            maxWidth: boxWidth - 8,
+            maxHeight: maxY - textY,
+            startFontSize: 9,
+            minFontSize: 7,
+            fontStyle: "normal",
+          });
 
-          if (availableHeight > 0) {
-            drawTextFitted({
-              text: beispielsatz,
-              x: x + 4,
-              y: exampleY,
-              maxWidth: boxWidth - 8,
-              maxHeight: availableHeight,
-              startFontSize: 9,
-              minFontSize: 7,
-              fontStyle: "normal",
-            });
-          }
+          textY += result.height + 2;
+        }
+
+        if (beispielsatz && textY < maxY) {
+          drawTextFitted({
+            text: beispielsatz,
+            x: x + 4,
+            y: textY,
+            maxWidth: boxWidth - 8,
+            maxHeight: maxY - textY,
+            startFontSize: 9,
+            minFontSize: 7,
+            fontStyle: "normal",
+          });
         }
       });
 
@@ -234,6 +245,8 @@ export default function VokabelkartenKlein({ vocs }: VokabelkartenKleinProps) {
         const { x, y } = getBackPosition(index);
 
         const uebersetzung = stripHtml(voc.uebersetzung);
+
+        const fraseuebersetzung = stripHtml(voc.fraseuebersetzung);
 
         const beispielsatzuebersetzung = stripHtml(voc.beispielsatzuebersetzung);
 
@@ -266,26 +279,36 @@ export default function VokabelkartenKlein({ vocs }: VokabelkartenKleinProps) {
           fontStyle: "bold",
         });
 
-        /*
-         * Beispielsatzübersetzung
-         */
-        if (beispielsatzuebersetzung) {
-          const exampleTranslationY = translationY + translationResult.height + 2;
+        /* Phrase-Übersetzung und Beispielsatzübersetzung */
+        let textY = translationY + translationResult.height + 2;
+        const maxY = y + boxHeight - 4;
 
-          const availableHeight = y + boxHeight - 4 - exampleTranslationY;
+        if (fraseuebersetzung && textY < maxY) {
+          const result = drawTextFitted({
+            text: fraseuebersetzung,
+            x: x + 4,
+            y: textY,
+            maxWidth: boxWidth - 8,
+            maxHeight: maxY - textY,
+            startFontSize: 9,
+            minFontSize: 7,
+            fontStyle: "normal",
+          });
 
-          if (availableHeight > 0) {
-            drawTextFitted({
-              text: beispielsatzuebersetzung,
-              x: x + 4,
-              y: exampleTranslationY,
-              maxWidth: boxWidth - 8,
-              maxHeight: availableHeight,
-              startFontSize: 9,
-              minFontSize: 7,
-              fontStyle: "normal",
-            });
-          }
+          textY += result.height + 2;
+        }
+
+        if (beispielsatzuebersetzung && textY < maxY) {
+          drawTextFitted({
+            text: beispielsatzuebersetzung,
+            x: x + 4,
+            y: textY,
+            maxWidth: boxWidth - 8,
+            maxHeight: maxY - textY,
+            startFontSize: 9,
+            minFontSize: 7,
+            fontStyle: "normal",
+          });
         }
       });
 
@@ -308,7 +331,7 @@ export default function VokabelkartenKlein({ vocs }: VokabelkartenKleinProps) {
       disabled={vocs.length === 0}
       className="rounded-lg border border-border px-4 py-2 text-sm font-medium transition hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
     >
-      Vokabelkarten klein drucken
+      VKklein
     </button>
   );
 }

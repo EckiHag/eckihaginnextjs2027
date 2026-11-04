@@ -28,6 +28,8 @@ export async function POST(request: Request) {
       uebersetzung,
       beispielsatz,
       beispielsatzuebersetzung,
+      frase,
+      fraseuebersetzung,
       eigenerKommentar,
       sprache,
       book,
@@ -57,12 +59,13 @@ export async function POST(request: Request) {
         art: art ?? "",
         artikel: artikel ?? "",
         wort: wort ?? "",
-
         uebersetzung: uebersetzung ?? "",
+
         beispielsatz: beispielsatz ?? "",
         beispielsatzuebersetzung: beispielsatzuebersetzung ?? "",
+        frase: frase ?? "",
+        fraseuebersetzung: fraseuebersetzung ?? "",
         eigenerKommentar: eigenerKommentar ?? "",
-
         sprache: sprache ?? "",
         book: book ?? "",
         chapter: chapter ?? "",
