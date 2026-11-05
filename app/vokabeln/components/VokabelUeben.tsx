@@ -34,6 +34,7 @@ export default function VokabelUeben({ vocs, reversed, sentencesOnly, onEdit }: 
   const [index, setIndex] = useState(0);
   const [umgedreht, setUmgedreht] = useState(false);
   const [hoverVorschau, setHoverVorschau] = useState(false);
+  const [buttonsLinks, setButtonsLinks] = useState(false);
 
   // Lernsets
   const [setModus, setSetModus] = useState<SetModus>("reihenfolge");
@@ -316,15 +317,32 @@ export default function VokabelUeben({ vocs, reversed, sentencesOnly, onEdit }: 
         </button>
       </div>
 
+      <div className="flex justify-end">
+        <button
+          type="button"
+          onClick={() => setButtonsLinks((vorher) => !vorher)}
+          className="rounded-lg border border-slate-300
+      bg-white px-3 py-1.5 text-sm font-medium
+      text-slate-700 hover:bg-slate-100"
+          title="Bedienbuttons auf die andere Kartenseite verschieben"
+        >
+          Buttons {buttonsLinks ? "rechts" : "links"} anzeigen
+        </button>
+      </div>
+
       {/* Lernkarte */}
       <div
         className={`relative flex h-80 w-full flex-none flex-col
-          overflow-hidden rounded-2xl border-2 py-4 pl-4 pr-16
-          shadow-md transition-colors
-          ${rueckseiteSichtbar ? "border-green-300 bg-green-50" : "border-blue-200 bg-white"}`}
+    overflow-hidden rounded-2xl border-2 py-4
+    shadow-md transition-colors
+    ${buttonsLinks ? "pl-16 pr-4" : "pl-4 pr-16"}
+    ${rueckseiteSichtbar ? "border-green-300 bg-green-50" : "border-blue-200 bg-white"}`}
       >
-        {/* Symbolbuttons oben rechts */}
-        <div className="absolute right-4 top-4 flex flex-col items-center gap-2">
+        {/* Symbolbuttons wahlweise links oder rechts */}
+        <div
+          className={`absolute top-4 flex flex-col items-center gap-2
+    ${buttonsLinks ? "left-4" : "right-4"}`}
+        >
           <button
             type="button"
             title="Karte umdrehen"
