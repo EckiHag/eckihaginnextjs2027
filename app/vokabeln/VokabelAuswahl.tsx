@@ -813,7 +813,7 @@ export default function VokabelAuswahl({ initialLanguages, initialLanguage, init
                   </button>
                 </div>
 
-                <div className="grid gap-3 sm:gap-4">
+                <div className="w-full space-y-3 sm:space-y-4">
                   {viewMode === "liste" && (
                     <VokabelListe
                       vocs={filteredVocs}
@@ -845,35 +845,23 @@ export default function VokabelAuswahl({ initialLanguages, initialLanguage, init
                     />
                   )}
 
-                  {viewMode === "ueben" && (
-                    <>
-                      <div className="flex justify-end">
-                        <button
-                          type="button"
-                          onClick={() => setUebungLinks((vorher) => !vorher)}
-                          className="rounded-lg border border-slate-300
-          bg-white px-3 py-2 text-sm font-medium
-          text-slate-700 hover:bg-slate-100"
-                        >
-                          Gesamten Übungsbereich nach {uebungLinks ? "rechts" : "links"}
-                        </button>
-                      </div>
-
-                      <div className={`flex w-full ${uebungLinks ? "justify-start" : "justify-end"}`}>
-                        <VokabelUeben
-                          key={`${sentencesOnly ? "saetze" : "vokabeln"}-${practiceVocs.map((voc) => voc.id).join("-")}`}
-                          vocs={practiceVocs}
-                          reversed={reversed}
-                          sentencesOnly={sentencesOnly}
-                          uebungLinks={uebungLinks}
-                          onEdit={(voc) => {
-                            startEditing(voc);
-                            setViewMode("ueben");
-                          }}
-                        />
-                      </div>
-                    </>
-                  )}
+                  <VokabelUeben
+                    key={`${sentencesOnly ? "saetze" : "vokabeln"}-${practiceVocs.map((voc) => voc.id).join("-")}`}
+                    vocs={practiceVocs}
+                    reversed={reversed}
+                    sentencesOnly={sentencesOnly}
+                    onEdit={(voc) => {
+                      startEditing(voc);
+                      setViewMode("ueben");
+                    }}
+                    editingId={editingId}
+                    editVoc={editVoc}
+                    setEditVoc={setEditVoc}
+                    onSave={() => void saveVoc()}
+                    onCancel={cancelEditing}
+                    saving={saving}
+                    error={error}
+                  />
                 </div>
               </div>
             )}

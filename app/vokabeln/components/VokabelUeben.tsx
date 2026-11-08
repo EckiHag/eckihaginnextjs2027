@@ -3,13 +3,20 @@
 import { useState } from "react";
 import type { Voc } from "../types";
 import { Eye, RotateCw, ArrowRight, ArrowLeft, Pencil, Shuffle } from "lucide-react";
+import VokabelEditor from "./VokabelEditor";
 
 type VokabelUebenProps = {
   vocs: Voc[];
   reversed: boolean;
   sentencesOnly: boolean;
-  uebungLinks: boolean;
   onEdit: (voc: Voc) => void;
+  editingId: number | null;
+  editVoc: Voc | null;
+  setEditVoc: React.Dispatch<React.SetStateAction<Voc | null>>;
+  onSave: () => void;
+  onCancel: () => void;
+  saving: boolean;
+  error: string;
 };
 
 type SetModus = "reihenfolge" | "gemischt";
@@ -29,7 +36,7 @@ function mischen(vokabeln: Voc[]) {
   return gemischt;
 }
 
-export default function VokabelUeben({ vocs, reversed, sentencesOnly, uebungLinks, onEdit }: VokabelUebenProps) {
+export default function VokabelUeben({ vocs, reversed, sentencesOnly, onEdit, editingId, editVoc, setEditVoc, onSave, onCancel, saving, error }: VokabelUebenProps) {
   const [setGroesse, setSetGroesse] = useState(12);
   const [karten, setKarten] = useState<Voc[]>(() => mischen(vocs.slice(0, 12)));
   const [index, setIndex] = useState(0);
@@ -44,7 +51,7 @@ export default function VokabelUeben({ vocs, reversed, sentencesOnly, uebungLink
   const rueckseiteSichtbar = umgedreht || hoverVorschau;
 
   const anzahlSets = Math.ceil(vocs.length / setGroesse);
-
+  const [uebungLinks, setUebungLinks] = useState(false);
   /*
    * Liefert die Vokabeln für das gewünschte Set.
    */
@@ -178,7 +185,9 @@ export default function VokabelUeben({ vocs, reversed, sentencesOnly, uebungLink
     setHoverVorschau(false);
   }
 
-  const voc = karten[index];
+  const kartenVoc = karten[index];
+
+  const voc = kartenVoc ? (vocs.find((eintrag) => eintrag.id === kartenVoc.id) ?? kartenVoc) : undefined;
 
   if (vocs.length === 0) {
     return (
@@ -209,232 +218,249 @@ export default function VokabelUeben({ vocs, reversed, sentencesOnly, uebungLink
   const backPhrase = reversed ? voc.frase : voc.fraseuebersetzung;
 
   return (
-    <div className="vokabel-uebung w-full max-w-xl space-y-5 p-4">
-      {/* Set-Auswahl */}
-      <div className="space-y-3 rounded-xl border border-slate-200 bg-slate-50 p-3">
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="flex items-center gap-2">
-            <label htmlFor="set-groesse" className="text-sm font-semibold text-slate-700">
-              Setgröße:
-            </label>
+    <div className="w-full min-w-0">
+      <div className={`w-full max-w-xl ${uebungLinks ? "mr-auto ml-0" : "ml-auto mr-0"}`}>
+        {/* Umschalter für die gesamte Übungsansicht */}
+        <div className={`mb-3 flex ${uebungLinks ? "justify-start" : "justify-end"}`}>
+          <button
+            type="button"
+            onClick={() => setUebungLinks((vorher) => !vorher)}
+            className="rounded-lg border border-slate-300 bg-white
+          px-3 py-2 text-sm font-medium text-slate-700
+          hover:bg-slate-100"
+          >
+            Gesamten Übungsbereich nach {uebungLinks ? "rechts" : "links"}
+          </button>
+        </div>
 
-            <select
-              id="set-groesse"
-              value={setGroesse}
-              onChange={(event) => setGroesseAendern(Number(event.target.value))}
-              title="Legt fest, wie viele Vokabeln ein Lernset enthält."
-              className="rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-sm text-slate-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-            >
-              <option value={6}>6</option>
-              <option value={8}>8</option>
-              <option value={10}>10</option>
-              <option value={12}>12</option>
-              <option value={15}>15</option>
-              <option value={20}>20</option>
-            </select>
+        {/* Gesamter Übungsbereich */}
+        <div className="vokabel-uebung w-full space-y-5 p-4">
+          {/* Set-Auswahl */}
+          <div className="space-y-3 rounded-xl border border-slate-200 bg-slate-50 p-3">
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="flex items-center gap-2">
+                <label htmlFor="set-groesse" className="text-sm font-semibold text-slate-700">
+                  Setgröße:
+                </label>
+
+                <select
+                  id="set-groesse"
+                  value={setGroesse}
+                  onChange={(event) => setGroesseAendern(Number(event.target.value))}
+                  title="Legt fest, wie viele Vokabeln ein Lernset enthält."
+                  className="rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-sm text-slate-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                >
+                  <option value={6}>6</option>
+                  <option value={8}>8</option>
+                  <option value={10}>10</option>
+                  <option value={12}>12</option>
+                  <option value={15}>15</option>
+                  <option value={20}>20</option>
+                </select>
+              </div>
+              <span className="mr-1 text-sm font-semibold text-slate-700">Set:</span>
+
+              <button
+                type="button"
+                onClick={() => setAuswaehlen("alle")}
+                className={`rounded-lg px-3 py-1.5 text-sm font-medium transition ${
+                  aktivesSet === "alle" ? "bg-blue-600 text-white" : "border border-slate-300 bg-white text-slate-700 hover:bg-slate-100"
+                }`}
+              >
+                Alle
+              </button>
+
+              {Array.from({ length: anzahlSets }, (_, nummer) => nummer + 1).map((setNummer) => (
+                <button
+                  key={setNummer}
+                  type="button"
+                  onClick={() => setAuswaehlen(setNummer)}
+                  className={`min-w-9 rounded-lg px-3 py-1.5 text-sm font-medium transition ${
+                    aktivesSet === setNummer ? "bg-blue-600 text-white" : "border border-slate-300 bg-white text-slate-700 hover:bg-slate-100"
+                  }`}
+                >
+                  {setNummer}
+                </button>
+              ))}
+            </div>
+
+            {/* Set-Modus */}
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                title="Bildet die Sets in der ursprünglichen Reihenfolge: Set 1 enthält Vokabel 1–12, Set 2 Vokabel 13–24 etc."
+                onClick={() => modusWechseln("reihenfolge")}
+                className={`rounded-lg px-3 py-1.5 text-sm font-medium transition ${
+                  setModus === "reihenfolge" ? "bg-slate-700 text-white" : "border border-slate-300 bg-white text-slate-700 hover:bg-slate-100"
+                }`}
+              >
+                Reihenfolge
+              </button>
+
+              <button
+                type="button"
+                title="Mischt alle geladenen Vokabeln und verteilt sie anschließend neu auf die Sets. Jede Vokabel kommt genau einmal vor."
+                onClick={() => modusWechseln("gemischt")}
+                className={`rounded-lg px-3 py-1.5 text-sm font-medium transition ${
+                  setModus === "gemischt" ? "bg-slate-700 text-white" : "border border-slate-300 bg-white text-slate-700 hover:bg-slate-100"
+                }`}
+              >
+                Gemischt
+              </button>
+
+              {setModus === "gemischt" && (
+                <button
+                  type="button"
+                  title="Erzeugt eine neue zufällige Verteilung aller Vokabeln auf die Sets."
+                  onClick={setsNeuMischen}
+                  className="flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
+                >
+                  <Shuffle className="h-4 w-4" />
+                  Sets neu mischen
+                </button>
+              )}
+            </div>
+
+            <div className="text-xs text-slate-500">
+              {aktivesSet === "alle" ? `${vocs.length} Vokabeln – alle geladenen Vokabeln` : `${karten.length} Vokabeln in Set ${aktivesSet}`}
+            </div>
           </div>
-          <span className="mr-1 text-sm font-semibold text-slate-700">Set:</span>
 
-          <button
-            type="button"
-            onClick={() => setAuswaehlen("alle")}
-            className={`rounded-lg px-3 py-1.5 text-sm font-medium transition ${
-              aktivesSet === "alle" ? "bg-blue-600 text-white" : "border border-slate-300 bg-white text-slate-700 hover:bg-slate-100"
-            }`}
-          >
-            Alle
-          </button>
+          {/* Kartenstatus */}
+          <div className="flex items-center justify-between text-sm text-slate-600">
+            <span>
+              Karte {index + 1} von {karten.length}
+            </span>
 
-          {Array.from({ length: anzahlSets }, (_, nummer) => nummer + 1).map((setNummer) => (
-            <button
-              key={setNummer}
-              type="button"
-              onClick={() => setAuswaehlen(setNummer)}
-              className={`min-w-9 rounded-lg px-3 py-1.5 text-sm font-medium transition ${
-                aktivesSet === setNummer ? "bg-blue-600 text-white" : "border border-slate-300 bg-white text-slate-700 hover:bg-slate-100"
-              }`}
-            >
-              {setNummer}
-            </button>
-          ))}
-        </div>
-
-        {/* Set-Modus */}
-        <div className="flex flex-wrap items-center gap-2">
-          <button
-            type="button"
-            title="Bildet die Sets in der ursprünglichen Reihenfolge: Set 1 enthält Vokabel 1–12, Set 2 Vokabel 13–24 etc."
-            onClick={() => modusWechseln("reihenfolge")}
-            className={`rounded-lg px-3 py-1.5 text-sm font-medium transition ${
-              setModus === "reihenfolge" ? "bg-slate-700 text-white" : "border border-slate-300 bg-white text-slate-700 hover:bg-slate-100"
-            }`}
-          >
-            Reihenfolge
-          </button>
-
-          <button
-            type="button"
-            title="Mischt alle geladenen Vokabeln und verteilt sie anschließend neu auf die Sets. Jede Vokabel kommt genau einmal vor."
-            onClick={() => modusWechseln("gemischt")}
-            className={`rounded-lg px-3 py-1.5 text-sm font-medium transition ${
-              setModus === "gemischt" ? "bg-slate-700 text-white" : "border border-slate-300 bg-white text-slate-700 hover:bg-slate-100"
-            }`}
-          >
-            Gemischt
-          </button>
-
-          {setModus === "gemischt" && (
             <button
               type="button"
-              title="Erzeugt eine neue zufällige Verteilung aller Vokabeln auf die Sets."
-              onClick={setsNeuMischen}
-              className="flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
+              onClick={aktuellesSetMischen}
+              title="Mischt nur die Reihenfolge der Vokabeln im aktuell ausgewählten Set."
+              className="font-medium text-blue-600 hover:underline"
             >
-              <Shuffle className="h-4 w-4" />
-              Sets neu mischen
+              Neu mischen
             </button>
-          )}
-        </div>
+          </div>
 
-        <div className="text-xs text-slate-500">
-          {aktivesSet === "alle" ? `${vocs.length} Vokabeln – alle geladenen Vokabeln` : `${karten.length} Vokabeln in Set ${aktivesSet}`}
-        </div>
-      </div>
-
-      {/* Kartenstatus */}
-      <div className="flex items-center justify-between text-sm text-slate-600">
-        <span>
-          Karte {index + 1} von {karten.length}
-        </span>
-
-        <button
-          type="button"
-          onClick={aktuellesSetMischen}
-          title="Mischt nur die Reihenfolge der Vokabeln im aktuell ausgewählten Set."
-          className="font-medium text-blue-600 hover:underline"
-        >
-          Neu mischen
-        </button>
-      </div>
-
-      {/* <div className="flex justify-end">
-        <button
-          type="button"
-          onClick={() => setButtonsLinks((vorher) => !vorher)}
-          className="rounded-lg border border-slate-300
-      bg-white px-3 py-1.5 text-sm font-medium
-      text-slate-700 hover:bg-slate-100"
-          title="Bedienbuttons auf die andere Kartenseite verschieben"
-        >
-          Buttons {buttonsLinks ? "rechts" : "links"} anzeigen
-        </button>
-      </div> */}
-
-      {/* Lernkarte */}
-
-      {/* Lernkarte */}
-      <div
-        className={`relative flex h-80 w-full flex-none flex-col
+          {/* Lernkarte */}
+          <div
+            className={`relative flex h-80 w-full flex-none flex-col
     overflow-hidden rounded-2xl border-2 py-4
     shadow-md transition-colors
     ${uebungLinks ? "pl-16 pr-4" : "pl-4 pr-16"}
     ${rueckseiteSichtbar ? "border-green-300 bg-green-50" : "border-blue-200 bg-white"}`}
-      >
-        {/* Symbolbuttons links oder rechts */}
-        <div
-          className={`absolute top-4 flex flex-col items-center gap-2
+          >
+            {/* Symbolbuttons links oder rechts */}
+            <div
+              className={`absolute top-4 flex flex-col items-center gap-2
       ${uebungLinks ? "left-4" : "right-4"}`}
-        >
-          <button
-            type="button"
-            title="Karte umdrehen"
-            aria-label="Karte umdrehen"
-            aria-pressed={umgedreht}
-            onClick={() => setUmgedreht((vorher) => !vorher)}
-            className="rounded-lg border border-slate-300 bg-white
+            >
+              <button
+                type="button"
+                title="Karte umdrehen"
+                aria-label="Karte umdrehen"
+                aria-pressed={umgedreht}
+                onClick={() => setUmgedreht((vorher) => !vorher)}
+                className="rounded-lg border border-slate-300 bg-white
               p-2 text-slate-600 hover:bg-blue-100
               focus-visible:outline-2 focus-visible:outline-blue-600"
-          >
-            <RotateCw className="h-4 w-4" />
-          </button>
+              >
+                <RotateCw className="h-4 w-4" />
+              </button>
 
-          <button
-            type="button"
-            title="Vokabel bearbeiten"
-            aria-label="Vokabel bearbeiten"
-            onClick={() => onEdit(voc)}
-            className="rounded-lg border border-slate-300 bg-white
+              <button
+                type="button"
+                title="Vokabel bearbeiten"
+                aria-label="Vokabel bearbeiten"
+                onClick={() => onEdit(voc)}
+                className="rounded-lg border border-slate-300 bg-white
               p-2 text-slate-600 hover:bg-amber-100
               focus-visible:outline-2 focus-visible:outline-blue-600"
-          >
-            <Pencil className="h-4 w-4" />
-          </button>
+              >
+                <Pencil className="h-4 w-4" />
+              </button>
 
-          <button
-            type="button"
-            title={!rueckseiteSichtbar ? "Übersetzung anzeigen" : "Nächste Vokabel"}
-            aria-label={!rueckseiteSichtbar ? "Übersetzung anzeigen" : "Nächste Vokabel"}
-            onClick={weiter}
-            className="rounded-lg bg-blue-600 p-2 text-white
+              <button
+                type="button"
+                title={!rueckseiteSichtbar ? "Übersetzung anzeigen" : "Nächste Vokabel"}
+                aria-label={!rueckseiteSichtbar ? "Übersetzung anzeigen" : "Nächste Vokabel"}
+                onClick={weiter}
+                className="rounded-lg bg-blue-600 p-2 text-white
               hover:bg-blue-700 focus-visible:outline-2
               focus-visible:outline-offset-2 focus-visible:outline-blue-600"
-          >
-            <ArrowRight className="h-4 w-4" />
-          </button>
+              >
+                <ArrowRight className="h-4 w-4" />
+              </button>
 
-          <button
-            type="button"
-            title="Vorherige Vokabel"
-            aria-label="Vorherige Vokabel"
-            onClick={zurueck}
-            className="rounded-lg bg-blue-600 p-2 text-white
+              <button
+                type="button"
+                title="Vorherige Vokabel"
+                aria-label="Vorherige Vokabel"
+                onClick={zurueck}
+                className="rounded-lg bg-blue-600 p-2 text-white
               hover:bg-blue-700 focus-visible:outline-2
               focus-visible:outline-offset-2 focus-visible:outline-blue-600"
-          >
-            <ArrowLeft className="h-4 w-4" />
-          </button>
+              >
+                <ArrowLeft className="h-4 w-4" />
+              </button>
 
-          <button
-            type="button"
-            title="Übersetzung beim Darüberfahren anzeigen"
-            aria-label="Übersetzung vorübergehend anzeigen"
-            onMouseEnter={() => setHoverVorschau(true)}
-            onMouseLeave={() => setHoverVorschau(false)}
-            onFocus={() => setHoverVorschau(true)}
-            onBlur={() => setHoverVorschau(false)}
-            className="rounded-lg border border-slate-300 bg-white
+              <button
+                type="button"
+                title="Übersetzung beim Darüberfahren anzeigen"
+                aria-label="Übersetzung vorübergehend anzeigen"
+                onMouseEnter={() => setHoverVorschau(true)}
+                onMouseLeave={() => setHoverVorschau(false)}
+                onFocus={() => setHoverVorschau(true)}
+                onBlur={() => setHoverVorschau(false)}
+                className="rounded-lg border border-slate-300 bg-white
               p-2 text-slate-600 hover:bg-blue-100
               focus-visible:outline-2 focus-visible:outline-blue-600"
-          >
-            <Eye className="h-4 w-4" />
-          </button>
-        </div>
+              >
+                <Eye className="h-4 w-4" />
+              </button>
+            </div>
 
-        {/* Karteninhalt */}
-        <div className="mt-3 shrink-0 text-center text-xs font-medium uppercase tracking-wide text-slate-500">
-          {rueckseiteSichtbar ? (reversed ? "Fremdsprache" : "Deutsch") : reversed ? "Deutsch" : "Fremdsprache"}
-        </div>
+            {/* Karteninhalt */}
+            <div className="mt-3 shrink-0 text-center text-xs font-medium uppercase tracking-wide text-slate-500">
+              {rueckseiteSichtbar ? (reversed ? "Fremdsprache" : "Deutsch") : reversed ? "Deutsch" : "Fremdsprache"}
+            </div>
 
-        <div className="mt-4 min-h-0 flex-1 overflow-y-auto text-center">
-          <div className="flex min-h-full flex-col items-center justify-start gap-5 px-2 pb-2">
-            {sentencesOnly ? (
-              <div className="w-full space-y-4 text-2xl font-medium leading-relaxed text-slate-900 sm:text-3xl">
-                {(rueckseiteSichtbar ? backPhrase : frontPhrase) && <div className="whitespace-pre-line wrap-break-word">{rueckseiteSichtbar ? backPhrase : frontPhrase}</div>}
+            <div className="mt-4 min-h-0 flex-1 overflow-y-auto text-center">
+              <div className="flex min-h-full flex-col items-center justify-start gap-5 px-2 pb-2">
+                {sentencesOnly ? (
+                  <div className="w-full space-y-4 text-2xl font-medium leading-relaxed text-slate-900 sm:text-3xl">
+                    {(rueckseiteSichtbar ? backPhrase : frontPhrase) && <div className="whitespace-pre-line wrap-break-word">{rueckseiteSichtbar ? backPhrase : frontPhrase}</div>}
 
-                <div className="whitespace-pre-line wrap-break-word">{rueckseiteSichtbar ? backSentence : frontSentence}</div>
-              </div>
-            ) : (
-              <>
-                <div className="w-full whitespace-pre-line wrap-break-word text-2xl font-bold text-slate-900">{rueckseiteSichtbar ? backWord : frontWord}</div>
+                    <div className="whitespace-pre-line wrap-break-word">{rueckseiteSichtbar ? backSentence : frontSentence}</div>
+                  </div>
+                ) : (
+                  <>
+                    <div className="w-full whitespace-pre-line wrap-break-word text-2xl font-bold text-slate-900">{rueckseiteSichtbar ? backWord : frontWord}</div>
 
-                {(rueckseiteSichtbar ? backPhrase : frontPhrase) && (
-                  <div className="w-full whitespace-pre-line wrap-break-word text-sm leading-relaxed text-slate-600">{rueckseiteSichtbar ? backPhrase : frontPhrase}</div>
+                    {(rueckseiteSichtbar ? backPhrase : frontPhrase) && (
+                      <div className="w-full whitespace-pre-line wrap-break-word text-sm leading-relaxed text-slate-600">{rueckseiteSichtbar ? backPhrase : frontPhrase}</div>
+                    )}
+
+                    <div className="w-full whitespace-pre-line wrap-break-word text-sm leading-relaxed text-slate-600">{rueckseiteSichtbar ? backSentence : frontSentence}</div>
+                  </>
                 )}
-
-                <div className="w-full whitespace-pre-line wrap-break-word text-sm leading-relaxed text-slate-600">{rueckseiteSichtbar ? backSentence : frontSentence}</div>
-              </>
-            )}
+              </div>
+            </div>
           </div>
+
+          {/* Editor direkt unter der Lernkarte */}
+          {editingId === voc.id && editVoc && (
+            <div className="mt-4 w-full rounded-xl border border-border bg-card p-4">
+              <h3 className="mb-3 text-lg font-semibold">Vokabel bearbeiten: {editVoc.wort}</h3>
+
+              <VokabelEditor editVoc={editVoc} setEditVoc={setEditVoc} onSave={onSave} onCancel={onCancel} loading={saving} />
+            </div>
+          )}
+          {error && (
+            <p role="alert" className="mt-3 text-sm text-red-600">
+              {error}
+            </p>
+          )}
         </div>
       </div>
     </div>
