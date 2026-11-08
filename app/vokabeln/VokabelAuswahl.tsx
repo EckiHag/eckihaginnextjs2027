@@ -846,32 +846,33 @@ export default function VokabelAuswahl({ initialLanguages, initialLanguage, init
                   )}
 
                   {viewMode === "ueben" && (
-                    <div className="flex justify-end">
-                      <button
-                        type="button"
-                        onClick={() => setUebungLinks((vorher) => !vorher)}
-                        className="rounded-lg border border-slate-300
-        bg-white px-3 py-2 text-sm font-medium
-        text-slate-700 hover:bg-slate-100"
-                      >
-                        Gesamten Übungsbereich nach {uebungLinks ? "rechts" : "links"}
-                      </button>
-                    </div>
-                  )}
+                    <>
+                      <div className="flex justify-end">
+                        <button
+                          type="button"
+                          onClick={() => setUebungLinks((vorher) => !vorher)}
+                          className="rounded-lg border border-slate-300
+          bg-white px-3 py-2 text-sm font-medium
+          text-slate-700 hover:bg-slate-100"
+                        >
+                          Gesamten Übungsbereich nach {uebungLinks ? "rechts" : "links"}
+                        </button>
+                      </div>
 
-                  {viewMode === "ueben" && (
-                    <div className={`flex w-full ${uebungLinks ? "justify-start" : "justify-end"}`}>
-                      <VokabelUeben
-                        key={`${sentencesOnly ? "saetze" : "vokabeln"}-${practiceVocs.map((voc) => voc.id).join("-")}`}
-                        vocs={practiceVocs}
-                        reversed={reversed}
-                        sentencesOnly={sentencesOnly}
-                        onEdit={(voc) => {
-                          startEditing(voc);
-                          setViewMode("ueben");
-                        }}
-                      />
-                    </div>
+                      <div className={`flex w-full ${uebungLinks ? "justify-start" : "justify-end"}`}>
+                        <VokabelUeben
+                          key={`${sentencesOnly ? "saetze" : "vokabeln"}-${practiceVocs.map((voc) => voc.id).join("-")}`}
+                          vocs={practiceVocs}
+                          reversed={reversed}
+                          sentencesOnly={sentencesOnly}
+                          uebungLinks={uebungLinks}
+                          onEdit={(voc) => {
+                            startEditing(voc);
+                            setViewMode("ueben");
+                          }}
+                        />
+                      </div>
+                    </>
                   )}
                 </div>
               </div>

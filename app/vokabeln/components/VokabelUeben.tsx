@@ -8,6 +8,7 @@ type VokabelUebenProps = {
   vocs: Voc[];
   reversed: boolean;
   sentencesOnly: boolean;
+  uebungLinks: boolean;
   onEdit: (voc: Voc) => void;
 };
 
@@ -28,13 +29,12 @@ function mischen(vokabeln: Voc[]) {
   return gemischt;
 }
 
-export default function VokabelUeben({ vocs, reversed, sentencesOnly, onEdit }: VokabelUebenProps) {
+export default function VokabelUeben({ vocs, reversed, sentencesOnly, uebungLinks, onEdit }: VokabelUebenProps) {
   const [setGroesse, setSetGroesse] = useState(12);
   const [karten, setKarten] = useState<Voc[]>(() => mischen(vocs.slice(0, 12)));
   const [index, setIndex] = useState(0);
   const [umgedreht, setUmgedreht] = useState(false);
   const [hoverVorschau, setHoverVorschau] = useState(false);
-  const [buttonsLinks, setButtonsLinks] = useState(false);
 
   // Lernsets
   const [setModus, setSetModus] = useState<SetModus>("reihenfolge");
@@ -317,7 +317,7 @@ export default function VokabelUeben({ vocs, reversed, sentencesOnly, onEdit }: 
         </button>
       </div>
 
-      <div className="flex justify-end">
+      {/* <div className="flex justify-end">
         <button
           type="button"
           onClick={() => setButtonsLinks((vorher) => !vorher)}
@@ -328,20 +328,22 @@ export default function VokabelUeben({ vocs, reversed, sentencesOnly, onEdit }: 
         >
           Buttons {buttonsLinks ? "rechts" : "links"} anzeigen
         </button>
-      </div>
+      </div> */}
+
+      {/* Lernkarte */}
 
       {/* Lernkarte */}
       <div
         className={`relative flex h-80 w-full flex-none flex-col
     overflow-hidden rounded-2xl border-2 py-4
     shadow-md transition-colors
-    ${buttonsLinks ? "pl-16 pr-4" : "pl-4 pr-16"}
+    ${uebungLinks ? "pl-16 pr-4" : "pl-4 pr-16"}
     ${rueckseiteSichtbar ? "border-green-300 bg-green-50" : "border-blue-200 bg-white"}`}
       >
-        {/* Symbolbuttons wahlweise links oder rechts */}
+        {/* Symbolbuttons links oder rechts */}
         <div
           className={`absolute top-4 flex flex-col items-center gap-2
-    ${buttonsLinks ? "left-4" : "right-4"}`}
+      ${uebungLinks ? "left-4" : "right-4"}`}
         >
           <button
             type="button"
